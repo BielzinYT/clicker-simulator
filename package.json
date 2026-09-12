@@ -1,0 +1,58 @@
+{
+  "name": "clicker-simulator",
+  "version": "1.0.0",
+  "description": "🐾 Clicker Simulator",
+  "main": "main.js",
+  "author": "O Teu Nome",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win",
+    "release": "electron-builder --win --publish always"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.0",
+    "electron-log": "^5.1.0"
+  },
+  "build": {
+    "appId": "com.tunome.clickersimulator",
+    "productName": "Clicker Simulator",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Clicker Simulator"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "O-TEU-USERNAME-GITHUB",
+        "repo": "clicker-simulator",
+        "releaseType": "release"
+      }
+    ]
+  }
+}
