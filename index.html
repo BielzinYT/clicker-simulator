@@ -4,8 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🐾 Clicker Simulator</title>
-<!-- SDK do Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
@@ -52,6 +51,8 @@
     font-size:12px; text-transform:uppercase; letter-spacing:1.5px;
     color:var(--text-dim); margin-bottom:10px; font-weight:700;
   }
+  .panel-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .panel-header h3 { margin-bottom:0; margin-right:auto; }
   .world-btn {
     display:flex; align-items:center; gap:10px; width:100%;
     padding:10px 12px; margin-bottom:8px; border-radius:10px;
@@ -97,10 +98,8 @@
   @keyframes rotate { to { transform:rotate(360deg); } }
   .click-btn:active { transform:scale(.95); }
   .click-btn .cpc { font-size:12px; font-weight:600; opacity:.85; }
-  .click-btn .big {
-    font-size:26px; font-weight:900; letter-spacing:1px;
-    text-shadow:0 2px 4px rgba(0,0,0,.4);
-  }
+  .click-btn .big { font-size:26px; font-weight:900; letter-spacing:1px;
+    text-shadow:0 2px 4px rgba(0,0,0,.4); }
   .float-text {
     position:absolute; pointer-events:none; font-weight:800; font-size:22px;
     color:var(--gold); text-shadow:0 2px 6px rgba(0,0,0,.8);
@@ -111,6 +110,65 @@
     0% { opacity:1; transform:translate(-50%,0) scale(1); }
     100% { opacity:0; transform:translate(-50%,-80px) scale(1.4); }
   }
+  .eggs-controls { display:flex; gap:4px; align-items:center; }
+  .egg-mult-btn {
+    background:var(--bg-2); border:1px solid var(--border); color:var(--text-dim);
+    padding:4px 10px; border-radius:6px; font-family:inherit;
+    font-weight:800; font-size:11px; cursor:pointer; transition:all .15s;
+  }
+  .egg-mult-btn:hover { background:var(--bg-3); color:var(--text); }
+  .egg-mult-btn.active {
+    background:linear-gradient(135deg,#38bdf8,#0ea5e9);
+    color:#fff; border-color:transparent;
+    box-shadow:0 2px 8px rgba(56,189,248,.5);
+  }
+  .auto-open-btn {
+    background:var(--bg-2); border:1px solid var(--border); color:var(--text-dim);
+    padding:4px 10px; border-radius:6px; font-family:inherit;
+    font-weight:800; font-size:11px; cursor:pointer; transition:all .15s;
+    min-width:38px;
+  }
+  .auto-open-btn:hover { background:var(--bg-3); color:var(--text); }
+  .auto-open-btn.active {
+    background:linear-gradient(135deg,#22c55e,#16a34a);
+    color:#fff; border-color:transparent;
+    box-shadow:0 0 12px rgba(34,197,94,.5);
+    animation:pulseBadge 1.5s ease-in-out infinite;
+  }
+  @keyframes pulseBadge {
+    0%,100% { box-shadow:0 0 8px rgba(34,197,94,.4); }
+    50% { box-shadow:0 0 20px rgba(34,197,94,.9); }
+  }
+  .mini-toggle {
+    background:var(--bg-3); border:1px solid var(--border); color:var(--text-dim);
+    padding:3px 9px; border-radius:12px; font-family:inherit;
+    font-weight:800; font-size:10px; cursor:pointer; transition:all .15s;
+    white-space:nowrap;
+  }
+  .mini-toggle:hover { color:var(--text); }
+  .mini-toggle.active {
+    background:linear-gradient(135deg,#22c55e,#16a34a);
+    color:#fff; border-color:transparent;
+    box-shadow:0 0 8px rgba(34,197,94,.5);
+  }
+  .equip-header { display:flex; align-items:center; gap:6px; margin-bottom:10px; }
+  .equip-header h3 { margin-bottom:0; margin-right:auto; }
+  .auto-counter {
+    position:fixed; top:78px; right:20px; z-index:500;
+    background:linear-gradient(135deg,#22c55e,#16a34a);
+    color:#fff; padding:8px 14px; border-radius:20px;
+    font-weight:800; font-size:13px; font-family:inherit;
+    box-shadow:0 4px 16px rgba(34,197,94,.6);
+    display:none; align-items:center; gap:8px;
+    animation:pulseBadge 1.5s ease-in-out infinite;
+  }
+  .auto-counter.show { display:flex; }
+  .auto-counter .ac-stop {
+    background:rgba(0,0,0,.25); border:none; color:#fff;
+    padding:2px 8px; border-radius:10px; font-size:11px;
+    cursor:pointer; font-weight:800; font-family:inherit;
+  }
+  .auto-counter .ac-stop:hover { background:rgba(0,0,0,.45); }
   .eggs-grid {
     display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
     gap:12px;
@@ -126,19 +184,18 @@
     box-shadow:0 10px 30px rgba(56,189,248,.25);
   }
   .egg-card.cant-afford { opacity:.55; filter:grayscale(.5); cursor:not-allowed; }
-  .egg-card.cant-afford:hover {
-    transform:none; border-color:var(--border); box-shadow:none;
+  .egg-card.cant-afford:hover { transform:none; border-color:var(--border); box-shadow:none; }
+  .egg-card.auto-target {
+    border-color:#22c55e;
+    box-shadow:0 0 0 3px rgba(34,197,94,.3), 0 0 20px rgba(34,197,94,.6);
+    animation:pulseBadge 1.5s ease-in-out infinite;
   }
-  .egg-emoji {
-    font-size:46px; display:block; margin-bottom:6px;
-    filter:drop-shadow(0 4px 8px rgba(0,0,0,.5));
-  }
+  .egg-emoji { font-size:46px; display:block; margin-bottom:6px;
+    filter:drop-shadow(0 4px 8px rgba(0,0,0,.5)); }
   .egg-name { font-weight:700; font-size:14px; margin-bottom:4px; }
   .egg-cost { font-size:13px; color:var(--gold); font-weight:700; }
-  .equipped-grid {
-    display:grid; grid-template-columns:repeat(2,1fr);
-    gap:8px; margin-bottom:14px;
-  }
+  .equipped-grid { display:grid; grid-template-columns:repeat(2,1fr);
+    gap:8px; margin-bottom:14px; }
   .equip-slot {
     aspect-ratio:1; border-radius:10px; background:var(--bg-2);
     border:2px dashed var(--border); display:flex; flex-direction:column;
@@ -147,10 +204,8 @@
   }
   .equip-slot.filled { border-style:solid; cursor:pointer; background:var(--bg-3); }
   .equip-slot.filled:hover { transform:scale(1.05); filter:brightness(1.2); }
-  .equip-slot .p-name {
-    font-size:9px; font-weight:700; margin-top:2px;
-    text-align:center; line-height:1.1; padding:0 4px;
-  }
+  .equip-slot .p-name { font-size:9px; font-weight:700; margin-top:2px;
+    text-align:center; line-height:1.1; padding:0 4px; }
   .equip-slot .p-mult { font-size:10px; color:var(--gold); font-weight:800; }
   .inv-list {
     max-height:400px; overflow-y:auto; display:flex;
@@ -168,10 +223,8 @@
   .pet-item .pi-emoji { font-size:22px; }
   .pet-item .pi-info { flex:1; min-width:0; }
   .pet-item .pi-name { font-weight:700; font-size:12px; }
-  .pet-item .pi-rarity {
-    font-size:9px; text-transform:uppercase;
-    letter-spacing:.5px; font-weight:700;
-  }
+  .pet-item .pi-rarity { font-size:9px; text-transform:uppercase;
+    letter-spacing:.5px; font-weight:700; }
   .pet-item .pi-mult { color:var(--gold); font-weight:800; font-size:12px; }
   .pi-sell {
     background:linear-gradient(135deg,#fbbf24,#f59e0b);
@@ -182,10 +235,17 @@
     color:#111; box-shadow:0 2px 6px rgba(251,191,36,.4);
   }
   .pi-sell:hover { transform:scale(1.18); box-shadow:0 3px 10px rgba(251,191,36,.7); }
-  .empty-msg {
-    text-align:center; color:var(--text-dim); font-size:12px;
-    padding:20px 10px; font-style:italic;
+  .pi-gift {
+    background:linear-gradient(135deg, #22c55e, #16a34a);
+    border:none; border-radius:6px; width:26px; height:26px;
+    font-size:13px; cursor:pointer; display:flex;
+    align-items:center; justify-content:center;
+    transition:transform .15s; padding:0; flex-shrink:0;
+    color:#fff; box-shadow:0 2px 6px rgba(34,197,94,.4);
   }
+  .pi-gift:hover { transform:scale(1.18); }
+  .empty-msg { text-align:center; color:var(--text-dim); font-size:12px;
+    padding:20px 10px; font-style:italic; }
   .sell-dupes-btn {
     width:100%; margin-bottom:10px; padding:8px 12px;
     background:linear-gradient(135deg,#fbbf24,#f59e0b);
@@ -213,22 +273,18 @@
     box-shadow:none;
   }
   .rebirth-btn.not-ready:hover { transform:none; box-shadow:none; }
-  .collection-btn {
-    background:linear-gradient(135deg,#f59e0b,#fbbf24); color:#111;
-    box-shadow:0 4px 12px rgba(251,191,36,.4);
-  }
-  .fusion-btn {
-    background:linear-gradient(135deg,#8b5cf6,#a78bfa);
-    box-shadow:0 4px 12px rgba(139,92,246,.4);
-  }
-  .stats-btn {
-    background:linear-gradient(135deg,#0ea5e9,#38bdf8); color:#042f4a;
-    box-shadow:0 4px 12px rgba(56,189,248,.4);
-  }
-  .rank-btn {
-    background:linear-gradient(135deg,#16a34a,#22c55e);
-    box-shadow:0 4px 12px rgba(34,197,94,.4);
-  }
+  .collection-btn { background:linear-gradient(135deg,#f59e0b,#fbbf24); color:#111;
+    box-shadow:0 4px 12px rgba(251,191,36,.4); }
+  .fusion-btn { background:linear-gradient(135deg,#8b5cf6,#a78bfa);
+    box-shadow:0 4px 12px rgba(139,92,246,.4); }
+  .stats-btn { background:linear-gradient(135deg,#0ea5e9,#38bdf8); color:#042f4a;
+    box-shadow:0 4px 12px rgba(56,189,248,.4); }
+  .rank-btn { background:linear-gradient(135deg,#16a34a,#22c55e);
+    box-shadow:0 4px 12px rgba(34,197,94,.4); }
+  .chat-btn { background: linear-gradient(135deg, #06b6d4, #0891b2);
+    box-shadow: 0 4px 12px rgba(6,182,212,.4); }
+  .gifts-btn { background: linear-gradient(135deg, #f43f5e, #e11d48);
+    box-shadow: 0 4px 12px rgba(244,63,94,.4); }
   .modal-overlay {
     position:fixed; inset:0; background:rgba(0,0,0,.75);
     backdrop-filter:blur(6px); display:none; align-items:center;
@@ -246,14 +302,10 @@
     0% { transform:scale(.3) rotate(-15deg); opacity:0; }
     100% { transform:scale(1) rotate(0); opacity:1; }
   }
-  .reveal-rarity {
-    font-size:12px; font-weight:800; letter-spacing:3px;
-    text-transform:uppercase; margin-bottom:10px;
-  }
-  .reveal-emoji {
-    font-size:80px; margin:10px 0;
-    animation:bounce .6s ease-in-out infinite alternate;
-  }
+  .reveal-rarity { font-size:12px; font-weight:800; letter-spacing:3px;
+    text-transform:uppercase; margin-bottom:10px; }
+  .reveal-emoji { font-size:80px; margin:10px 0;
+    animation:bounce .6s ease-in-out infinite alternate; }
   @keyframes bounce {
     from { transform:translateY(0); } to { transform:translateY(-8px); }
   }
@@ -266,6 +318,34 @@
     font-family:inherit;
   }
   .reveal-close:hover { transform:scale(1.05); }
+  .multi-reveal-card {
+    background:linear-gradient(160deg,var(--bg-2),var(--bg-1));
+    border-radius:20px; padding:22px 26px; text-align:center;
+    border:3px solid; max-width:420px; width:100%;
+    animation:revealPop .5s cubic-bezier(.34,1.56,.64,1);
+    position:relative; z-index:1001;
+  }
+  .multi-reveal-title {
+    font-size:12px; font-weight:800; letter-spacing:3px;
+    text-transform:uppercase; margin-bottom:14px;
+    color:var(--text-dim);
+  }
+  .multi-reveal-list { display:flex; flex-direction:column; gap:8px;
+    margin-bottom:18px; max-height:340px; overflow-y:auto; padding-right:4px; }
+  .multi-reveal-list::-webkit-scrollbar { width:6px; }
+  .multi-reveal-list::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+  .mr-item {
+    display:flex; align-items:center; gap:10px;
+    padding:10px 14px; border-radius:10px;
+    background:var(--bg-2); border-left:4px solid;
+    animation:chatIn .3s ease-out; text-align:left;
+  }
+  @keyframes chatIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  .mr-item .mr-emoji { font-size:32px; filter:drop-shadow(0 3px 6px rgba(0,0,0,.5)); }
+  .mr-item .mr-info { flex:1; min-width:0; }
+  .mr-item .mr-name { font-weight:800; font-size:14px; }
+  .mr-item .mr-rarity { font-size:10px; text-transform:uppercase; font-weight:800; letter-spacing:.5px; }
+  .mr-item .mr-mult { color:var(--gold); font-weight:800; font-size:13px; }
   .egg-open-stage {
     position:relative; width:300px; height:300px;
     display:flex; align-items:center; justify-content:center;
@@ -447,14 +527,14 @@
     border-radius:20px; border:1px solid rgba(251,191,36,.3);
     white-space:nowrap;
   }
-  .fusion-btn {
+  .fusion-action-btn {
     background:linear-gradient(135deg,#8b5cf6,#a78bfa);
     border:none; color:#fff; padding:8px 18px;
     border-radius:10px; font-weight:800; font-size:13px;
     cursor:pointer; font-family:inherit; white-space:nowrap;
     transition:all .15s; box-shadow:0 4px 12px rgba(139,92,246,.4);
   }
-  .fusion-btn:hover { transform:scale(1.05); }
+  .fusion-action-btn:hover { transform:scale(1.05); }
   .stats-grid {
     display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
     gap:10px; margin-bottom:20px;
@@ -524,12 +604,10 @@
   .rank-info b { color:#22c55e; }
   .rank-list { display:flex; flex-direction:column; gap:6px; }
   .rank-row {
-    display:grid;
-    grid-template-columns:52px 1fr auto;
+    display:grid; grid-template-columns:52px 1fr auto;
     align-items:center; gap:12px;
     padding:10px 14px; border-radius:10px;
-    background:var(--bg-2);
-    border:1px solid var(--border);
+    background:var(--bg-2); border:1px solid var(--border);
     transition:transform .15s, background .15s;
   }
   .rank-row:hover { background:var(--bg-3); transform:translateX(3px); }
@@ -539,10 +617,7 @@
     box-shadow:0 0 16px rgba(34,197,94,.25);
   }
   .rank-row.you:hover { transform:translateX(3px); background:linear-gradient(90deg, rgba(34,197,94,.25), rgba(34,197,94,.1)); }
-  .rank-pos {
-    font-size:16px; font-weight:900; text-align:center;
-    width:52px;
-  }
+  .rank-pos { font-size:16px; font-weight:900; text-align:center; width:52px; }
   .rank-pos.top1 { color:#fbbf24; text-shadow:0 0 12px rgba(251,191,36,.6); font-size:20px; }
   .rank-pos.top2 { color:#cbd5e1; text-shadow:0 0 10px rgba(203,213,225,.5); font-size:18px; }
   .rank-pos.top3 { color:#d97706; text-shadow:0 0 10px rgba(217,119,6,.5); font-size:17px; }
@@ -558,10 +633,7 @@
     text-transform:uppercase;
   }
   .rank-meta { font-size:11px; color:var(--text-dim); font-weight:600; margin-top:2px; }
-  .rank-score {
-    font-size:14px; font-weight:900;
-    color:var(--gold); white-space:nowrap;
-  }
+  .rank-score { font-size:14px; font-weight:900; color:var(--gold); white-space:nowrap; }
   .rank-score small { font-size:10px; color:var(--text-dim); font-weight:600; display:block; }
   .rank-refresh-btn {
     background:linear-gradient(135deg,#22c55e,#16a34a);
@@ -576,8 +648,7 @@
   @keyframes spin { to { transform:rotate(360deg); } }
   .rank-loading {
     text-align:center; padding:40px 20px;
-    color:var(--text-dim); font-size:13px;
-    font-style:italic;
+    color:var(--text-dim); font-size:13px; font-style:italic;
   }
   .rank-name-edit {
     background:linear-gradient(135deg,#22c55e,#16a34a);
@@ -587,52 +658,46 @@
     transition:all .15s;
   }
   .rank-name-edit:hover { transform:translateY(-2px); box-shadow:0 4px 12px rgba(34,197,94,.5); }
-
-  /* ====== MODAL DE ATUALIZAÇÃO ====== */
+  .rank-tabs {
+    display: flex; gap: 6px; margin-bottom: 14px;
+    background: var(--bg-2); border-radius: 10px; padding: 4px;
+  }
+  .rank-tab {
+    flex: 1; padding: 8px 14px; border-radius: 8px;
+    background: transparent; border: none; color: var(--text-dim);
+    font-family: inherit; font-weight: 800; font-size: 12px;
+    cursor: pointer; transition: all .15s;
+  }
+  .rank-tab:hover { color: var(--text); }
+  .rank-tab.active {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff; box-shadow: 0 3px 10px rgba(34,197,94,.4);
+  }
+  .week-info {
+    font-size: 11px; color: var(--text-dim); text-align: center;
+    margin-bottom: 12px; font-style: italic;
+  }
   .update-card {
     background: linear-gradient(160deg, var(--bg-2), var(--bg-1));
-    border: 3px solid #22c55e;
-    border-radius: 20px;
-    padding: 28px 32px;
-    max-width: 440px;
-    width: 100%;
+    border: 3px solid #22c55e; border-radius: 20px;
+    padding: 28px 32px; max-width: 440px; width: 100%;
     text-align: center;
     animation: revealPop .5s cubic-bezier(.34,1.56,.64,1);
     box-shadow: 0 0 60px rgba(34,197,94,.4);
-    position: relative;
-    z-index: 1001;
+    position: relative; z-index: 1001;
   }
-  .update-icon {
-    font-size: 54px;
-    margin-bottom: 8px;
-    animation: bounce .6s ease-in-out infinite alternate;
-  }
+  .update-icon { font-size: 54px; margin-bottom: 8px; animation: bounce .6s ease-in-out infinite alternate; }
   .update-title {
-    font-size: 20px;
-    font-weight: 800;
-    margin-bottom: 6px;
+    font-size: 20px; font-weight: 800; margin-bottom: 6px;
     background: linear-gradient(90deg,#22c55e,#16a34a);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  .update-version {
-    font-size: 14px;
-    color: var(--gold);
-    font-weight: 700;
-    margin-bottom: 14px;
-  }
+  .update-version { font-size: 14px; color: var(--gold); font-weight: 700; margin-bottom: 14px; }
   .update-notes {
-    background: rgba(0,0,0,.25);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 14px;
-    font-size: 12px;
-    line-height: 1.6;
-    text-align: left;
-    max-height: 160px;
-    overflow-y: auto;
-    margin-bottom: 18px;
+    background: rgba(0,0,0,.25); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px;
+    font-size: 12px; line-height: 1.6; text-align: left;
+    max-height: 160px; overflow-y: auto; margin-bottom: 18px;
     white-space: pre-wrap;
   }
   .update-notes::-webkit-scrollbar { width: 6px; }
@@ -640,89 +705,151 @@
   .update-notes::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
   .update-actions { display: flex; gap: 10px; }
   .update-actions button {
-    flex: 1;
-    padding: 12px 16px;
-    border-radius: 10px;
-    font-weight: 800;
-    font-size: 14px;
-    cursor: pointer;
-    font-family: inherit;
-    border: none;
-    transition: all .15s;
+    flex: 1; padding: 12px 16px; border-radius: 10px;
+    font-weight: 800; font-size: 14px; cursor: pointer;
+    font-family: inherit; border: none; transition: all .15s;
   }
-  .update-later {
-    background: var(--bg-3);
-    color: var(--text);
-    border: 1px solid var(--border) !important;
-  }
+  .update-later { background: var(--bg-3); color: var(--text); border: 1px solid var(--border) !important; }
   .update-later:hover { background: #374151; }
   .update-now {
-    background: linear-gradient(135deg,#22c55e,#16a34a);
-    color: #fff;
+    background: linear-gradient(135deg,#22c55e,#16a34a); color: #fff;
     box-shadow: 0 4px 14px rgba(34,197,94,.5);
   }
   .update-now:hover { transform: scale(1.03); box-shadow: 0 6px 20px rgba(34,197,94,.7); }
   .update-progress { margin-top: 16px; }
   .update-bar {
-    height: 12px;
-    background: var(--bg-0);
-    border-radius: 6px;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    margin-bottom: 6px;
+    height: 12px; background: var(--bg-0); border-radius: 6px;
+    overflow: hidden; border: 1px solid var(--border); margin-bottom: 6px;
   }
   .update-fill {
-    height: 100%;
-    width: 0%;
-    border-radius: 6px;
+    height: 100%; width: 0%; border-radius: 6px;
     background: linear-gradient(90deg,#22c55e,#fbbf24);
     transition: width .3s ease;
     box-shadow: 0 0 12px rgba(34,197,94,.6);
   }
-  .update-percent {
-    font-size: 13px;
-    font-weight: 800;
-    color: var(--gold);
-  }
+  .update-percent { font-size: 13px; font-weight: 800; color: var(--gold); }
   .update-ready { margin-top: 16px; }
   .update-restart {
-    width: 100%;
-    padding: 12px;
-    border-radius: 10px;
-    border: none;
-    background: linear-gradient(135deg,#a855f7,#ec4899);
-    color: #fff;
-    font-weight: 800;
-    font-size: 14px;
-    cursor: pointer;
-    font-family: inherit;
-    box-shadow: 0 4px 14px rgba(168,85,247,.5);
-    transition: all .15s;
+    width: 100%; padding: 12px; border-radius: 10px; border: none;
+    background: linear-gradient(135deg,#a855f7,#ec4899); color: #fff;
+    font-weight: 800; font-size: 14px; cursor: pointer; font-family: inherit;
+    box-shadow: 0 4px 14px rgba(168,85,247,.5); transition: all .15s;
   }
   .update-restart:hover { transform: scale(1.03); box-shadow: 0 6px 20px rgba(168,85,247,.7); }
-
-  /* ====== BOTÃO DE ATUALIZAÇÃO NO HEADER (se disponível) ====== */
   .update-badge {
     display: none;
     background: linear-gradient(135deg,#22c55e,#16a34a);
-    color: #fff;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-weight: 800;
-    font-size: 12px;
-    cursor: pointer;
-    border: none;
-    font-family: inherit;
+    color: #fff; padding: 6px 14px; border-radius: 20px;
+    font-weight: 800; font-size: 12px; cursor: pointer;
+    border: none; font-family: inherit;
     box-shadow: 0 4px 12px rgba(34,197,94,.5);
     animation: pulseBadge 1.5s ease-in-out infinite;
   }
   .update-badge.show { display: inline-flex; align-items: center; gap: 5px; }
   .update-badge:hover { transform: scale(1.06); }
-  @keyframes pulseBadge {
-    0%,100% { box-shadow: 0 4px 12px rgba(34,197,94,.5); }
-    50% { box-shadow: 0 4px 22px rgba(34,197,94,.9), 0 0 30px rgba(34,197,94,.5); }
+  .name-card {
+    background: linear-gradient(160deg, var(--bg-2), var(--bg-1));
+    border: 2px solid var(--accent); border-radius: 18px;
+    padding: 24px 28px; max-width: 400px; width: 100%;
+    text-align: center;
+    animation: revealPop .35s cubic-bezier(.34,1.56,.64,1);
+    box-shadow: 0 0 40px rgba(56,189,248,.4);
   }
-
+  .name-icon { font-size: 48px; margin-bottom: 8px; }
+  .name-title {
+    font-size: 18px; font-weight: 800; margin-bottom: 4px;
+    background: linear-gradient(90deg, #38bdf8, #a855f7);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .name-subtitle {
+    font-size: 11px; color: var(--text-dim);
+    margin-bottom: 16px; text-transform: uppercase;
+    letter-spacing: 1px; font-weight: 700;
+  }
+  .name-input {
+    width: 100%; background: var(--bg-0);
+    border: 2px solid var(--border); color: var(--text);
+    padding: 12px 16px; border-radius: 10px;
+    font-size: 16px; font-weight: 700; font-family: inherit;
+    outline: none; text-align: center;
+    transition: border-color .15s; margin-bottom: 16px;
+  }
+  .name-input:focus { border-color: var(--accent); box-shadow: 0 0 12px rgba(56,189,248,.3); }
+  .name-actions { display: flex; gap: 10px; }
+  .name-actions button {
+    flex: 1; padding: 12px 16px; border-radius: 10px;
+    font-weight: 800; font-size: 14px; cursor: pointer;
+    font-family: inherit; border: none; transition: all .15s;
+  }
+  .name-cancel { background: var(--bg-3); color: var(--text); border: 1px solid var(--border) !important; }
+  .name-cancel:hover { background: #374151; }
+  .name-confirm {
+    background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff;
+    box-shadow: 0 4px 14px rgba(34,197,94,.5);
+  }
+  .name-confirm:hover { transform: scale(1.03); box-shadow: 0 6px 20px rgba(34,197,94,.7); }
+  .chat-container { display: flex; flex-direction: column; height: 60vh; gap: 8px; }
+  .chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 6px; }
+  .chat-messages::-webkit-scrollbar { width: 6px; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .chat-msg {
+    padding: 8px 12px; border-radius: 10px; background: var(--bg-2);
+    font-size: 13px; border-left: 3px solid var(--border);
+    animation: chatIn .25s ease-out;
+  }
+  .chat-msg.you { background: rgba(34,197,94,.12); border-left-color: #22c55e; }
+  .chat-msg .cm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+  .chat-msg .cm-name { font-weight: 800; font-size: 11px; color: var(--accent); }
+  .chat-msg.you .cm-name { color: #22c55e; }
+  .chat-msg .cm-time { font-size: 9px; color: var(--text-dim); }
+  .chat-msg .cm-text { color: var(--text); word-break: break-word; }
+  .chat-input-row { display: flex; gap: 8px; }
+  .chat-input {
+    flex: 1; background: var(--bg-0); border: 2px solid var(--border);
+    color: var(--text); padding: 10px 14px; border-radius: 10px;
+    font-size: 13px; font-family: inherit; outline: none;
+  }
+  .chat-input:focus { border-color: var(--accent); }
+  .chat-send-btn {
+    background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+    border: none; color: #fff; padding: 10px 18px; border-radius: 10px;
+    font-weight: 800; cursor: pointer; font-family: inherit; transition: transform .15s;
+  }
+  .chat-send-btn:hover { transform: scale(1.05); }
+  .gift-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px; margin-bottom: 8px; background: var(--bg-2);
+    border-radius: 12px; border-left: 4px solid var(--gold);
+  }
+  .gift-pet-emoji { font-size: 32px; }
+  .gift-info { flex: 1; min-width: 0; }
+  .gift-from { font-size: 11px; color: var(--text-dim); font-weight: 700; }
+  .gift-pet-name { font-size: 14px; font-weight: 800; margin: 2px 0; }
+  .gift-rarity { font-size: 10px; font-weight: 800; text-transform: uppercase; }
+  .gift-actions { display: flex; gap: 6px; }
+  .gift-action-btn {
+    border: none; border-radius: 8px; padding: 8px 14px;
+    font-weight: 800; font-size: 12px; cursor: pointer;
+    font-family: inherit; transition: transform .15s;
+  }
+  .gift-accept { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
+  .gift-reject { background: var(--bg-3); color: var(--text); border: 1px solid var(--border) !important; }
+  .gift-action-btn:hover { transform: scale(1.05); }
+  .gift-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: #ef4444; color: #fff; font-size: 10px; font-weight: 800;
+    border-radius: 10px; padding: 1px 6px; margin-left: 4px;
+    min-width: 16px; animation: pulseBadge 1.5s ease-in-out infinite;
+  }
+  .send-gift-pet {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px; background: var(--bg-2); border-radius: 12px;
+    margin-bottom: 14px; border: 2px solid var(--border);
+  }
+  .send-gift-pet .sgp-emoji { font-size: 40px; }
+  .send-gift-pet .sgp-info { flex: 1; min-width: 0; }
+  .send-gift-pet .sgp-name { font-weight: 800; font-size: 15px; }
+  .send-gift-pet .sgp-meta { font-size: 11px; color: var(--text-dim); font-weight: 700; margin-top: 2px; }
   #toast {
     position:fixed; bottom:30px; left:50%; transform:translateX(-50%);
     background:var(--bg-2); border:1px solid var(--accent); color:var(--text);
@@ -739,6 +866,108 @@
     75% { transform:translateX(6px); }
   }
   .shake { animation:shake .3s; }
+
+  /* TUTORIAL */
+  .tutorial-overlay {
+    position:fixed; inset:0; background:rgba(0,0,0,.85);
+    backdrop-filter:blur(8px); z-index:5000;
+    display:none; align-items:center; justify-content:center;
+    padding:20px;
+  }
+  .tutorial-overlay.show { display:flex; }
+  .tutorial-card {
+    background:linear-gradient(160deg,var(--bg-2),var(--bg-1));
+    border:3px solid var(--accent); border-radius:20px;
+    padding:28px 32px; max-width:460px; width:100%;
+    text-align:center;
+    animation:revealPop .4s cubic-bezier(.34,1.56,.64,1);
+    box-shadow:0 0 60px rgba(56,189,248,.5);
+    position:relative;
+  }
+  .tutorial-icon { font-size:64px; margin-bottom:10px; animation:bounce .6s ease-in-out infinite alternate; }
+  .tutorial-title {
+    font-size:22px; font-weight:800; margin-bottom:10px;
+    background:linear-gradient(90deg,#38bdf8,#a855f7);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .tutorial-text {
+    font-size:14px; color:var(--text); line-height:1.7;
+    margin-bottom:22px; padding:14px;
+    background:rgba(56,189,248,.08);
+    border-radius:12px; border:1px solid rgba(56,189,248,.2);
+  }
+  .tutorial-text b { color:var(--gold); }
+  .tutorial-text .highlight { color:var(--accent); font-weight:800; }
+  .tutorial-progress {
+    display:flex; gap:6px; justify-content:center; margin-bottom:16px;
+  }
+  .tutorial-dot {
+    width:8px; height:8px; border-radius:50%;
+    background:var(--bg-3); transition:all .3s;
+  }
+  .tutorial-dot.active { background:var(--accent); width:24px; border-radius:4px; }
+  .tutorial-dot.done { background:#22c55e; }
+  .tutorial-actions { display:flex; gap:10px; }
+  .tutorial-actions button {
+    flex:1; padding:12px 16px; border-radius:10px;
+    font-weight:800; font-size:14px; cursor:pointer;
+    font-family:inherit; border:none; transition:all .15s;
+  }
+  .tutorial-skip {
+    background:var(--bg-3); color:var(--text-dim);
+    border:1px solid var(--border) !important;
+    font-size:12px !important; flex:0 0 auto !important;
+    padding:12px 14px !important;
+  }
+  .tutorial-skip:hover { background:#374151; color:var(--text); }
+  .tutorial-next {
+    background:linear-gradient(135deg,#38bdf8,#0ea5e9); color:#fff;
+    box-shadow:0 4px 14px rgba(56,189,248,.5);
+  }
+  .tutorial-next:hover { transform:scale(1.03); box-shadow:0 6px 20px rgba(56,189,248,.7); }
+  .tutorial-highlight {
+    position:relative; z-index:5001;
+    animation:tutorialPulse 1.2s ease-in-out infinite;
+    pointer-events:none;
+  }
+  @keyframes tutorialPulse {
+    0%,100% { box-shadow:0 0 0 0 rgba(56,189,248,.8); }
+    50% { box-shadow:0 0 0 20px rgba(56,189,248,0); }
+  }
+
+  /* OFFLINE */
+  .offline-card {
+    background:linear-gradient(160deg,var(--bg-2),var(--bg-1));
+    border:3px solid var(--gold); border-radius:20px;
+    padding:28px 32px; max-width:440px; width:100%;
+    text-align:center;
+    animation:revealPop .5s cubic-bezier(.34,1.56,.64,1);
+    box-shadow:0 0 60px rgba(251,191,36,.5);
+  }
+  .offline-icon { font-size:60px; margin-bottom:10px; animation:bounce .6s ease-in-out infinite alternate; }
+  .offline-title {
+    font-size:22px; font-weight:800; margin-bottom:10px;
+    background:linear-gradient(90deg,#fbbf24,#f59e0b);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .offline-time {
+    font-size:13px; color:var(--text-dim); font-weight:700;
+    margin-bottom:16px;
+  }
+  .offline-reward {
+    font-size:32px; font-weight:900; color:var(--gold);
+    margin-bottom:20px;
+    text-shadow:0 0 20px rgba(251,191,36,.6);
+  }
+  .offline-claim {
+    width:100%; padding:14px; border-radius:12px; border:none;
+    background:linear-gradient(135deg,#fbbf24,#f59e0b);
+    color:#111; font-weight:800; font-size:15px;
+    cursor:pointer; font-family:inherit;
+    box-shadow:0 4px 16px rgba(251,191,36,.6);
+    transition:transform .15s;
+  }
+  .offline-claim:hover { transform:scale(1.03); box-shadow:0 6px 24px rgba(251,191,36,.8); }
 </style>
 </head>
 <body>
@@ -749,6 +978,8 @@
   <div class="stat">✨ <span class="val accent" id="uiCpc">1</span>/clique</div>
   <div class="stat">🔄 <span class="val" id="uiRebirths">0</span></div>
   <button class="update-badge" id="updateBadge" title="Nova versão disponível!">🆕 Nova versão</button>
+  <button class="hdr-btn chat-btn" id="chatBtn" title="Chat global">💬</button>
+  <button class="hdr-btn gifts-btn" id="giftsBtn" title="Presentes">🎁<span class="gift-badge" id="giftsBadge" style="display:none;">0</span></button>
   <button class="hdr-btn collection-btn" id="collectionBtn" title="Coleção">🏆</button>
   <button class="hdr-btn fusion-btn" id="fusionBtn" title="Fusão">🧬</button>
   <button class="hdr-btn rank-btn" id="rankBtn" title="Ranking">🏅</button>
@@ -770,12 +1001,23 @@
       </button>
     </div>
     <div class="panel">
-      <h3>🥚 Loja de Ovos</h3>
+      <div class="panel-header">
+        <h3>🥚 Loja de Ovos</h3>
+        <div class="eggs-controls">
+          <button class="egg-mult-btn active" data-mult="1" id="eggMult1">1×</button>
+          <button class="egg-mult-btn" data-mult="2" id="eggMult2">2×</button>
+          <button class="egg-mult-btn" data-mult="3" id="eggMult3">3×</button>
+          <button class="auto-open-btn" id="autoOpenBtn" title="Abrir ovos automaticamente">▶️</button>
+        </div>
+      </div>
       <div class="eggs-grid" id="eggList"></div>
     </div>
   </section>
   <aside class="panel">
-    <h3>⚔️ Equipados (<span id="equipCount">0</span>/4)</h3>
+    <div class="equip-header">
+      <h3>⚔️ Equipados (<span id="equipCount">0</span>/4)</h3>
+      <button class="mini-toggle" id="autoEquipBtn" title="Equipar automaticamente os melhores">🎯 Auto</button>
+    </div>
     <div class="equipped-grid" id="equippedSlots"></div>
     <h3>🎒 Inventário (<span id="invCount">0</span>)</h3>
     <button class="sell-dupes-btn" id="sellDupesBtn" style="display:none;">💰 Vender Duplicados</button>
@@ -784,6 +1026,34 @@
 </main>
 
 <div id="fireworks"></div>
+
+<div class="auto-counter" id="autoCounter">
+  <span>▶️ Auto: <span id="autoCounterCount">0</span> abertos</span>
+  <button class="ac-stop" id="autoCounterStop">⏸️</button>
+</div>
+
+<div class="tutorial-overlay" id="tutorialOverlay">
+  <div class="tutorial-card">
+    <div class="tutorial-icon" id="tutorialIcon">👋</div>
+    <div class="tutorial-title" id="tutorialTitle">Bem-vindo!</div>
+    <div class="tutorial-text" id="tutorialText"></div>
+    <div class="tutorial-progress" id="tutorialProgress"></div>
+    <div class="tutorial-actions">
+      <button class="tutorial-skip" id="tutorialSkip">Saltar</button>
+      <button class="tutorial-next" id="tutorialNext">Continuar →</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="offlineModal">
+  <div class="offline-card">
+    <div class="offline-icon">🌙</div>
+    <div class="offline-title">Bem-vindo de volta!</div>
+    <div class="offline-time" id="offlineTime"></div>
+    <div class="offline-reward" id="offlineReward"></div>
+    <button class="offline-claim" id="offlineClaim">🎁 Receber</button>
+  </div>
+</div>
 
 <div class="modal-overlay" id="eggOpenModal">
   <div class="egg-open-stage">
@@ -799,6 +1069,14 @@
     <div class="reveal-name" id="revealName">Gatinho</div>
     <div class="reveal-mult" id="revealMult">+1.5 por clique</div>
     <button class="reveal-close" id="revealClose">Continuar</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="multiRevealModal">
+  <div class="multi-reveal-card" id="multiRevealCard">
+    <div class="multi-reveal-title" id="multiRevealTitle">🥚 3 Pets</div>
+    <div class="multi-reveal-list" id="multiRevealList"></div>
+    <button class="reveal-close" id="multiRevealClose">Continuar</button>
   </div>
 </div>
 
@@ -820,6 +1098,7 @@
   <div class="modal-card">
     <div class="modal-header">
       <h2 class="fusion-title">🧬 Fusão de Pets</h2>
+      <button class="mini-toggle" id="autoFusionBtn" title="Fundir automaticamente">⚡ Auto</button>
       <button class="close-x" id="fusionClose">✕</button>
     </div>
     <div class="modal-body" id="fusionBody"></div>
@@ -844,11 +1123,16 @@
       <button class="rank-refresh-btn" id="rankRefresh">🔄 Atualizar</button>
       <button class="close-x" id="rankClose">✕</button>
     </div>
-    <div class="modal-body" id="rankBody"></div>
+    <div class="modal-body">
+      <div class="rank-tabs">
+        <button class="rank-tab active" id="rankTabTotal">🌍 Total</button>
+        <button class="rank-tab" id="rankTabWeekly">📅 Esta semana</button>
+      </div>
+      <div class="rank-content" id="rankBody"></div>
+    </div>
   </div>
 </div>
 
-<!-- ===== MODAL DE ATUALIZAÇÃO ===== -->
 <div class="modal-overlay" id="updateModal">
   <div class="update-card">
     <div class="update-icon">🎉</div>
@@ -869,23 +1153,77 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="nameModal">
+  <div class="name-card">
+    <div class="name-icon">👤</div>
+    <div class="name-title">O teu nome no ranking</div>
+    <div class="name-subtitle">Máximo 16 caracteres</div>
+    <input type="text" id="nameInput" class="name-input" maxlength="16" placeholder="Escreve o teu nome...">
+    <div class="name-actions">
+      <button class="name-cancel" id="nameCancel">Cancelar</button>
+      <button class="name-confirm" id="nameConfirm">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="chatModal">
+  <div class="modal-card" style="max-width:500px;">
+    <div class="modal-header">
+      <h2 class="chat-title" style="background:linear-gradient(90deg,#06b6d4,#0891b2);-webkit-background-clip:text;background-clip:text;color:transparent;">💬 Chat Global</h2>
+      <button class="close-x" id="chatClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="chat-container">
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-row">
+          <input type="text" class="chat-input" id="chatInput" placeholder="Escreve uma mensagem..." maxlength="200">
+          <button class="chat-send-btn" id="chatSend">📤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="giftsModal">
+  <div class="modal-card" style="max-width:500px;">
+    <div class="modal-header">
+      <h2 class="gift-title" style="background:linear-gradient(90deg,#f43f5e,#e11d48);-webkit-background-clip:text;background-clip:text;color:transparent;">🎁 Presentes Recebidos</h2>
+      <button class="close-x" id="giftsClose">✕</button>
+    </div>
+    <div class="modal-body" id="giftsBody"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="sendGiftModal">
+  <div class="modal-card" style="max-width:400px;">
+    <div class="modal-header">
+      <h2 style="background:linear-gradient(90deg,#22c55e,#16a34a);-webkit-background-clip:text;background-clip:text;color:transparent;">🎁 Oferecer Pet</h2>
+      <button class="close-x" id="sendGiftClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="send-gift-pet" id="sendGiftPetPreview"></div>
+      <label style="font-size:11px;color:var(--text-dim);font-weight:800;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px;">Nome do destinatário</label>
+      <input type="text" class="name-input" id="sendGiftTo" maxlength="16" placeholder="Ex: BielzinYT" style="margin-bottom:14px;">
+      <div style="display:flex;gap:10px;">
+        <button class="name-cancel" style="flex:1;padding:12px;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;background:var(--bg-3);color:var(--text);border:1px solid var(--border);" id="sendGiftCancel">Cancelar</button>
+        <button class="name-confirm" style="flex:1;padding:12px;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;box-shadow:0 4px 14px rgba(34,197,94,.5);" id="sendGiftConfirm">Enviar 🎁</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
-/* ============ CONFIGURAÇÃO SUPABASE ============ */
+/* ============ CONFIG SUPABASE ============ */
 const SUPABASE_URL = 'https://atbyonkplgxgpblgpsto.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0YnlvbmtwbGd4Z3BibGdwc3RvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyMDAwMzcsImV4cCI6MjEwNDc3NjAzN30.BeZaIu_KHVgqJvuldeJg0XBDPaygUCeEatc_EKblSDY';
 
 let supabaseClient = null;
-try {
-  supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  console.log('✅ Supabase ligado com sucesso');
-} catch(e) {
-  console.error('❌ Erro ao ligar ao Supabase:', e);
-}
+try { supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); console.log('✅ Supabase ligado'); }
+catch(e) { console.error('❌ Supabase:', e); }
 
 /* ============ DADOS ============ */
-
 const RARITIES = {
   comum:    { name:'Comum',    color:'#9ca3af', glow:'rgba(156,163,175,.5)', weight:6000 },
   incomum:  { name:'Incomum',  color:'#4ade80', glow:'rgba(74,222,128,.5)',  weight:2500 },
@@ -894,152 +1232,96 @@ const RARITIES = {
   lendario: { name:'Lendário', color:'#fbbf24', glow:'rgba(251,191,36,.8)',  weight:90   },
   mitico:   { name:'Mítico',   color:'#f87171', glow:'rgba(248,113,113,.9)', weight:10   },
 };
-
 const RARITY_ORDER = ['comum','incomum','raro','epico','lendario','mitico'];
 const SELL_MULT = { comum:10, incomum:25, raro:60, epico:150, lendario:400, mitico:1000 };
 const FUSION_FACTOR = 4;
-
 const REBIRTH_BASE_COST = 50000;
 const REBIRTH_MULT = 4;
 
 const WORLDS = [
-  {
-    name:'Iniciante', emoji:'🌱', unlock:0,
-    theme:'linear-gradient(135deg,#065f46,#134e4a)',
-    eggs:[
+  { name:'Iniciante', emoji:'🌱', unlock:0, theme:'linear-gradient(135deg,#065f46,#134e4a)', eggs:[
       { name:'Ovo Básico', emoji:'🥚', cost:100, pets:{
-        comum:    [['Gatinho','🐱',1.5],['Cachorrinho','🐶',1.5]],
-        incomum:  [['Coelho','🐰',3]],
-        raro:     [['Raposa','🦊',7]],
-        epico:    [['Panda','🐼',18]],
-        lendario: [['Dragão Bebê','🐲',50]],
-        mitico:   [['Fênix','🔥',150]],
+        comum:[['Gatinho','🐱',1.5],['Cachorrinho','🐶',1.5]],
+        incomum:[['Coelho','🐰',3]], raro:[['Raposa','🦊',7]],
+        epico:[['Panda','🐼',18]], lendario:[['Dragão Bebê','🐲',50]], mitico:[['Fênix','🔥',150]],
       }},
       { name:'Ovo Premium', emoji:'🥚', cost:5000, pets:{
-        comum:    [['Peixinho','🐟',10],['Ratinho','🐭',10]],
-        incomum:  [['Tartaruga','🐢',20]],
-        raro:     [['Lobo','🐺',45]],
-        epico:    [['Tigre','🐯',100]],
-        lendario: [['Unicórnio','🦄',250]],
-        mitico:   [['Grifo','🦅',700]],
+        comum:[['Peixinho','🐟',10],['Ratinho','🐭',10]],
+        incomum:[['Tartaruga','🐢',20]], raro:[['Lobo','🐺',45]],
+        epico:[['Tigre','🐯',100]], lendario:[['Unicórnio','🦄',250]], mitico:[['Grifo','🦅',700]],
       }},
       { name:'Ovo Dourado', emoji:'🥚', cost:250000, pets:{
-        comum:    [['Abelha','🐝',50],['Joaninha','🐞',50]],
-        incomum:  [['Coruja','🦉',100]],
-        raro:     [['Golfinho','🐬',250]],
-        epico:    [['Leopardo','🐆',600]],
-        lendario: [['T-Rex','🦖',1500]],
-        mitico:   [['Dragão Dourado','🐉',5000]],
+        comum:[['Abelha','🐝',50],['Joaninha','🐞',50]],
+        incomum:[['Coruja','🦉',100]], raro:[['Golfinho','🐬',250]],
+        epico:[['Leopardo','🐆',600]], lendario:[['T-Rex','🦖',1500]], mitico:[['Dragão Dourado','🐉',5000]],
       }},
-    ]
-  },
-  {
-    name:'Selva', emoji:'🌴', unlock:1,
-    theme:'linear-gradient(135deg,#14532d,#166534)',
-    eggs:[
+  ]},
+  { name:'Selva', emoji:'🌴', unlock:1, theme:'linear-gradient(135deg,#14532d,#166534)', eggs:[
       { name:'Ovo Selvagem', emoji:'🥚', cost:5e6, pets:{
-        comum:    [['Sapo','🐸',500],['Lagartixa','🦎',500]],
-        incomum:  [['Cobra','🐍',1000]],
-        raro:     [['Gorila','🦍',2500]],
-        epico:    [['Elefante','🐘',6000]],
-        lendario: [['Leão Rei','🦁',15000]],
-        mitico:   [['Serpente Alada','🐲',50000]],
+        comum:[['Sapo','🐸',500],['Lagartixa','🦎',500]],
+        incomum:[['Cobra','🐍',1000]], raro:[['Gorila','🦍',2500]],
+        epico:[['Elefante','🐘',6000]], lendario:[['Leão Rei','🦁',15000]], mitico:[['Serpente Alada','🐲',50000]],
       }},
       { name:'Ovo Tribal', emoji:'🥚', cost:1e8, pets:{
-        comum:    [['Papagaio','🦜',5000],['Macaco','🐒',5000]],
-        incomum:  [['Zebra','🦓',10000]],
-        raro:     [['Rinoceronte','🦏',25000]],
-        epico:    [['Tigre Branco','🐅',60000]],
-        lendario: [['Pavão Divino','🦚',150000]],
-        mitico:   [['Deus Macaco','🐵',500000]],
+        comum:[['Papagaio','🦜',5000],['Macaco','🐒',5000]],
+        incomum:[['Zebra','🦓',10000]], raro:[['Rinoceronte','🦏',25000]],
+        epico:[['Tigre Branco','🐅',60000]], lendario:[['Pavão Divino','🦚',150000]], mitico:[['Deus Macaco','🐵',500000]],
       }},
       { name:'Ovo Amazónico', emoji:'🥚', cost:2e9, pets:{
-        comum:    [['Crocodilo','🐊',50000],['Preguiça','🦥',50000]],
-        incomum:  [['Morcego','🦇',100000]],
-        raro:     [['Escorpião','🦂',250000]],
-        epico:    [['Pantera','🐆',600000]],
-        lendario: [['Águia Real','🦅',1500000]],
-        mitico:   [['Ent Ancestral','🌳',5000000]],
+        comum:[['Crocodilo','🐊',50000],['Preguiça','🦥',50000]],
+        incomum:[['Morcego','🦇',100000]], raro:[['Escorpião','🦂',250000]],
+        epico:[['Pantera','🐆',600000]], lendario:[['Águia Real','🦅',1500000]], mitico:[['Ent Ancestral','🌳',5000000]],
       }},
-    ]
-  },
-  {
-    name:'Oceano', emoji:'🌊', unlock:3,
-    theme:'linear-gradient(135deg,#0c4a6e,#075985)',
-    eggs:[
+  ]},
+  { name:'Oceano', emoji:'🌊', unlock:3, theme:'linear-gradient(135deg,#0c4a6e,#075985)', eggs:[
       { name:'Ovo Coral', emoji:'🥚', cost:5e10, pets:{
-        comum:    [['Peixe Palhaço','🐠',500000],['Camarão','🦐',500000]],
-        incomum:  [['Polvo','🐙',1000000]],
-        raro:     [['Tubarão','🦈',2500000]],
-        epico:    [['Baleia','🐋',6000000]],
-        lendario: [['Sereia','🧜',15000000]],
-        mitico:   [['Dragão Marinho','🐉',50000000]],
+        comum:[['Peixe Palhaço','🐠',500000],['Camarão','🦐',500000]],
+        incomum:[['Polvo','🐙',1000000]], raro:[['Tubarão','🦈',2500000]],
+        epico:[['Baleia','🐋',6000000]], lendario:[['Sereia','🧜',15000000]], mitico:[['Dragão Marinho','🐉',50000000]],
       }},
       { name:'Ovo Abissal', emoji:'🥚', cost:1e12, pets:{
-        comum:    [['Lula','🦑',5000000],['Baiacu','🐡',5000000]],
-        incomum:  [['Lagosta','🦞',10000000]],
-        raro:     [['Orca','🐳',25000000]],
-        epico:    [['Enguia Elétrica','⚡',60000000]],
-        lendario: [['Poseidon','🔱',150000000]],
-        mitico:   [['Leviatã','🐲',500000000]],
+        comum:[['Lula','🦑',5000000],['Baiacu','🐡',5000000]],
+        incomum:[['Lagosta','🦞',10000000]], raro:[['Orca','🐳',25000000]],
+        epico:[['Enguia Elétrica','⚡',60000000]], lendario:[['Poseidon','🔱',150000000]], mitico:[['Leviatã','🐲',500000000]],
       }},
       { name:'Ovo Atlântida', emoji:'🥚', cost:2e13, pets:{
-        comum:    [['Concha Mágica','🐚',50000000],['Caranguejo','🦀',50000000]],
-        incomum:  [['Tartaruga Sábia','🐢',100000000]],
-        raro:     [['Rainha do Mar','🧜‍♀️',250000000]],
-        epico:    [['Kraken','🦑',600000000]],
-        lendario: [['Zeus Marinho','⚡',1500000000]],
-        mitico:   [['Deus do Oceano','🌊',5000000000]],
+        comum:[['Concha Mágica','🐚',50000000],['Caranguejo','🦀',50000000]],
+        incomum:[['Tartaruga Sábia','🐢',100000000]], raro:[['Rainha do Mar','🧜‍♀️',250000000]],
+        epico:[['Kraken','🦑',600000000]], lendario:[['Zeus Marinho','⚡',1500000000]], mitico:[['Deus do Oceano','🌊',5000000000]],
       }},
-    ]
-  },
-  {
-    name:'Cósmico', emoji:'🌌', unlock:6,
-    theme:'linear-gradient(135deg,#4c1d95,#1e1b4b)',
-    eggs:[
+  ]},
+  { name:'Cósmico', emoji:'🌌', unlock:6, theme:'linear-gradient(135deg,#4c1d95,#1e1b4b)', eggs:[
       { name:'Ovo Estelar', emoji:'🥚', cost:5e14, pets:{
-        comum:    [['Estrela','⭐',500000000],['Lua','🌙',500000000]],
-        incomum:  [['Cometa','☄️',1000000000]],
-        raro:     [['Saturno','🪐',2500000000]],
-        epico:    [['Sol','🌞',6000000000]],
-        lendario: [['Supernova','💫',15000000000]],
-        mitico:   [['Buraco Negro','🕳️',50000000000]],
+        comum:[['Estrela','⭐',500000000],['Lua','🌙',500000000]],
+        incomum:[['Cometa','☄️',1000000000]], raro:[['Saturno','🪐',2500000000]],
+        epico:[['Sol','🌞',6000000000]], lendario:[['Supernova','💫',15000000000]], mitico:[['Buraco Negro','🕳️',50000000000]],
       }},
       { name:'Ovo Galáctico', emoji:'🥚', cost:1e16, pets:{
-        comum:    [['Alien','👽',5000000000],['UFO','🛸',5000000000]],
-        incomum:  [['Nebulosa','🌌',10000000000]],
-        raro:     [['Estrela Cadente','🌠',25000000000]],
-        epico:    [['Quasar','🌟',60000000000]],
-        lendario: [['Galáxia Viva','🌀',150000000000]],
-        mitico:   [['Devorador de Mundos','🌑',500000000000]],
+        comum:[['Alien','👽',5000000000],['UFO','🛸',5000000000]],
+        incomum:[['Nebulosa','🌌',10000000000]], raro:[['Estrela Cadente','🌠',25000000000]],
+        epico:[['Quasar','🌟',60000000000]], lendario:[['Galáxia Viva','🌀',150000000000]], mitico:[['Devorador de Mundos','🌑',500000000000]],
       }},
       { name:'Ovo Divino', emoji:'🥚', cost:2e17, pets:{
-        comum:    [['Anjo','👼',50000000000],['Serafim','😇',50000000000]],
-        incomum:  [['Oráculo','🔮',100000000000]],
-        raro:     [['Mago Cósmico','🧙',250000000000]],
-        epico:    [['Olho Cósmico','👁️',600000000000]],
-        lendario: [['Titã','🗿',1500000000000]],
-        mitico:   [['Dragão Cósmico','🐲',5000000000000]],
+        comum:[['Anjo','👼',50000000000],['Serafim','😇',50000000000]],
+        incomum:[['Oráculo','🔮',100000000000]], raro:[['Mago Cósmico','🧙',250000000000]],
+        epico:[['Olho Cósmico','👁️',600000000000]], lendario:[['Titã','🗿',1500000000000]], mitico:[['Dragão Cósmico','🐲',5000000000000]],
       }},
-    ]
-  },
+  ]},
 ];
 
 const MAX_EQUIPPED = 4;
 const SAVE_KEY = 'clicker2d_save_v1';
 const PLAYER_NAME_KEY = 'clicker2d_name_v1';
+const NAME_CONFIRMED_KEY = 'clicker2d_name_confirmed';
+const TUTORIAL_KEY = 'clicker2d_tutorial_done';
+const LAST_SEEN_KEY = 'clicker2d_last_seen';
 
 /* ============ ESTADO ============ */
-
 let state = {
   clicks:0, totalClicks:0, rebirths:0, currentWorld:0,
   pets:[], petUid:0,
-  stats: {
-    petsOpened: 0,
-    petsByRarity: { comum:0, incomum:0, raro:0, epico:0, lendario:0, mitico:0 },
-    clicksMade: 0,
-    playTimeMs: 0,
-  },
+  stats: { petsOpened: 0, petsByRarity: { comum:0,incomum:0,raro:0,epico:0,lendario:0,mitico:0 }, clicksMade: 0, playTimeMs: 0 },
+  automation: { autoEquip:false, autoFusion:false, eggMultiplier:1, autoOpenActive:false, autoOpenTarget:null, autoOpenedCount:0 },
 };
 
 function ensureDefaults() {
@@ -1048,36 +1330,30 @@ function ensureDefaults() {
   if (typeof state.stats.clicksMade !== 'number') state.stats.clicksMade = 0;
   if (typeof state.stats.playTimeMs !== 'number') state.stats.playTimeMs = 0;
   if (!state.stats.petsByRarity) state.stats.petsByRarity = {};
-  RARITY_ORDER.forEach(k => {
-    if (typeof state.stats.petsByRarity[k] !== 'number') state.stats.petsByRarity[k] = 0;
-  });
+  RARITY_ORDER.forEach(k => { if (typeof state.stats.petsByRarity[k] !== 'number') state.stats.petsByRarity[k] = 0; });
   if (!Array.isArray(state.pets)) state.pets = [];
-  state.pets.forEach(p => {
-    if (typeof p.fusionLevel !== 'number') p.fusionLevel = 0;
-  });
+  state.pets.forEach(p => { if (typeof p.fusionLevel !== 'number') p.fusionLevel = 0; });
   if (typeof state.currentWorld !== 'number' || state.currentWorld >= WORLDS.length) state.currentWorld = 0;
   if (typeof state.clicks !== 'number') state.clicks = 0;
   if (typeof state.totalClicks !== 'number') state.totalClicks = 0;
   if (typeof state.rebirths !== 'number') state.rebirths = 0;
   if (typeof state.petUid !== 'number') state.petUid = 0;
+  if (!state.automation) state.automation = {};
+  const a = state.automation;
+  if (typeof a.autoEquip !== 'boolean') a.autoEquip = false;
+  if (typeof a.autoFusion !== 'boolean') a.autoFusion = false;
+  if (typeof a.eggMultiplier !== 'number' || ![1,2,3].includes(a.eggMultiplier)) a.eggMultiplier = 1;
+  if (typeof a.autoOpenActive !== 'boolean') a.autoOpenActive = false;
+  if (!a.autoOpenTarget || typeof a.autoOpenTarget.w !== 'number') a.autoOpenTarget = null;
+  if (typeof a.autoOpenedCount !== 'number') a.autoOpenedCount = 0;
 }
-
-function save() {
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch(e) {}
-}
+function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); localStorage.setItem(LAST_SEEN_KEY, Date.now().toString()); } catch(e){} }
 function load() {
-  try {
-    const raw = localStorage.getItem(SAVE_KEY);
-    if (raw) {
-      const p = JSON.parse(raw);
-      Object.assign(state, p);
-    }
-  } catch(e) {}
+  try { const raw = localStorage.getItem(SAVE_KEY); if (raw) Object.assign(state, JSON.parse(raw)); } catch(e){}
   ensureDefaults();
 }
 
 /* ============ UTIL ============ */
-
 function fmt(n) {
   if (n < 1000) return Math.floor(n).toString();
   const u = ['','K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc'];
@@ -1090,44 +1366,70 @@ function fmtMult(n) {
   return fmt(n);
 }
 function fmtTime(ms) {
-  const s = Math.floor(ms / 1000);
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sec = s % 60;
-  if (h > 0) return h + 'h ' + m + 'm';
-  if (m > 0) return m + 'm ' + sec + 's';
-  return sec + 's';
+  const s = Math.floor(ms/1000);
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+  if (h > 0) return h+'h '+m+'m';
+  if (m > 0) return m+'m '+sec+'s';
+  return sec+'s';
 }
 function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(t._timeout);
-  t._timeout = setTimeout(() => t.classList.remove('show'), 2200);
+  const t = document.getElementById('toast'); if (!t) return;
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._timeout); t._timeout = setTimeout(() => t.classList.remove('show'), 2200);
 }
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function getDisplayName(pet) { return pet.fusionLevel ? pet.name + ' ' + '⭐'.repeat(pet.fusionLevel) : pet.name; }
+function getDisplayMult(pet) { return pet.mult * Math.pow(FUSION_FACTOR, pet.fusionLevel || 0); }
+function getSellPrice(pet) { return Math.floor(getDisplayMult(pet) * SELL_MULT[pet.rarity]); }
+function getPetGroupKey(pet) { return pet.name + '|' + pet.emoji + '|' + (pet.fusionLevel || 0); }
+
+/* ============ ÁUDIO ============ */
+let musica = null;
+let somClique = null;
+let somOvo = null;
+
+function initAudio() {
+  musica = new Audio('musica.mp3');
+  musica.loop = true;
+  musica.volume = 0.3;
+
+  somClique = new Audio('som_clique.mp3');
+  somClique.volume = 0.5;
+
+  somOvo = new Audio('som_ovo.mp3');
+  somOvo.volume = 0.6;
+
+  // Tenta tocar música ao primeiro clique (política dos browsers)
+  const startMusicOnce = () => {
+    if (musica && musica.paused) musica.play().catch(() => {});
+    document.removeEventListener('click', startMusicOnce);
+  };
+  document.addEventListener('click', startMusicOnce);
 }
-function getDisplayName(pet) {
-  if (!pet.fusionLevel) return pet.name;
-  return pet.name + ' ' + '⭐'.repeat(pet.fusionLevel);
+
+function tocarSomClique() {
+  if (!somClique) return;
+  // Clona para permitir cliques rápidos (o mesmo Audio não sobrepõe)
+  try {
+    const clone = somClique.cloneNode();
+    clone.volume = somClique.volume;
+    clone.play().catch(() => {});
+  } catch(e) { /* ignora */ }
 }
-function getDisplayMult(pet) {
-  return pet.mult * Math.pow(FUSION_FACTOR, pet.fusionLevel || 0);
-}
-function getSellPrice(pet) {
-  return Math.floor(getDisplayMult(pet) * SELL_MULT[pet.rarity]);
-}
-function getPetGroupKey(pet) {
-  return pet.name + '|' + pet.emoji + '|' + (pet.fusionLevel || 0);
+
+function tocarSomOvo() {
+  if (!somOvo) return;
+  try {
+    const clone = somOvo.cloneNode();
+    clone.volume = somOvo.volume;
+    clone.play().catch(() => {});
+  } catch(e) { /* ignora */ }
 }
 
 /* ============ LÓGICA ============ */
-
 function getCPC() {
   const petBonus = state.pets.filter(p => p.equipped).reduce((s,p) => s + getDisplayMult(p), 0);
-  const rebirthMult = 1 + state.rebirths * 0.5;
-  return (1 + petBonus) * rebirthMult;
+  return (1 + petBonus) * (1 + state.rebirths * 0.5);
 }
 function getRebirthCost() { return REBIRTH_BASE_COST * Math.pow(REBIRTH_MULT, state.rebirths); }
 function isWorldUnlocked(i) { return state.rebirths >= WORLDS[i].unlock; }
@@ -1135,10 +1437,7 @@ function isWorldUnlocked(i) { return state.rebirths >= WORLDS[i].unlock; }
 function rollRarity() {
   const total = Object.values(RARITIES).reduce((s,r) => s + r.weight, 0);
   let roll = Math.random() * total;
-  for (const k of RARITY_ORDER) {
-    roll -= RARITIES[k].weight;
-    if (roll <= 0) return k;
-  }
+  for (const k of RARITY_ORDER) { roll -= RARITIES[k].weight; if (roll <= 0) return k; }
   return 'comum';
 }
 function pickPet(egg) {
@@ -1156,75 +1455,93 @@ function pickPet(egg) {
 }
 
 /* ============ AÇÕES ============ */
-
 function doClick(evt) {
   const gain = getCPC();
-  state.clicks += gain;
-  state.totalClicks += gain;
-  state.stats.clicksMade++;
+  state.clicks += gain; state.totalClicks += gain; state.stats.clicksMade++;
+  tocarSomClique();
   spawnFloat(gain, evt);
-  updateUI();
-  save();
+  updateUI(); save();
 }
-
 function spawnFloat(amount, evt) {
-  const zone = document.getElementById('clickZone');
+  const zone = document.getElementById('clickZone'); if (!zone) return;
   const r = zone.getBoundingClientRect();
   const x = evt && evt.clientX ? evt.clientX - r.left : r.width/2;
-  const y = evt && evt.clientY ? evt.clientY - r.top  : r.height/2;
+  const y = evt && evt.clientY ? evt.clientY - r.top : r.height/2;
   const el = document.createElement('div');
-  el.className = 'float-text';
-  el.textContent = '+' + fmt(amount);
-  el.style.left = x + 'px';
-  el.style.top  = y + 'px';
+  el.className = 'float-text'; el.textContent = '+' + fmt(amount);
+  el.style.left = x+'px'; el.style.top = y+'px';
   zone.appendChild(el);
   setTimeout(() => el.remove(), 900);
 }
 
 function openEgg(worldIdx, eggIdx) {
-  const egg = WORLDS[worldIdx].eggs[eggIdx];
-  if (state.clicks < egg.cost) {
-    const cards = document.querySelectorAll('.egg-card');
-    if (cards[eggIdx]) {
-      cards[eggIdx].classList.add('shake');
-      setTimeout(() => cards[eggIdx].classList.remove('shake'), 300);
-    }
-    toast('Cliques insuficientes! Faltam ' + fmt(egg.cost - state.clicks));
-    return;
+  if (state.automation.autoOpenActive) {
+    state.automation.autoOpenTarget = { w: worldIdx, e: eggIdx };
+    startAutoOpen(); updateUI(); save(); return;
   }
-  state.clicks -= egg.cost;
-  const p = pickPet(egg);
-  const pet = { uid: ++state.petUid, name:p.name, emoji:p.emoji, mult:p.mult, rarity:p.rarity, equipped:false, fusionLevel:0 };
-  state.pets.push(pet);
-  if (state.pets.filter(x => x.equipped).length < MAX_EQUIPPED) pet.equipped = true;
-  state.stats.petsOpened++;
-  state.stats.petsByRarity[pet.rarity] = (state.stats.petsByRarity[pet.rarity] || 0) + 1;
-  updateUI();
-  save();
-  playEggAnimation(pet);
+  const mult = state.automation.eggMultiplier || 1;
+  openEggsBatch(worldIdx, eggIdx, mult, false);
 }
 
-/* ===== ANIMAÇÃO DE ABERTURA DO OVO ===== */
-function playEggAnimation(pet) {
+function openEggsBatch(worldIdx, eggIdx, count, silent) {
+  const egg = WORLDS[worldIdx].eggs[eggIdx];
+  const opened = [];
+  for (let i = 0; i < count; i++) {
+    if (state.clicks < egg.cost) break;
+    state.clicks -= egg.cost;
+    const p = pickPet(egg);
+    const pet = { uid: ++state.petUid, name:p.name, emoji:p.emoji, mult:p.mult, rarity:p.rarity, equipped:false, fusionLevel:0 };
+    state.pets.push(pet);
+    if (state.pets.filter(x => x.equipped).length < MAX_EQUIPPED) pet.equipped = true;
+    state.stats.petsOpened++;
+    state.stats.petsByRarity[pet.rarity] = (state.stats.petsByRarity[pet.rarity] || 0) + 1;
+    opened.push(pet);
+  }
+  if (opened.length === 0) {
+    if (!silent) {
+      const cards = document.querySelectorAll('.egg-card');
+      if (cards[eggIdx]) { cards[eggIdx].classList.add('shake'); setTimeout(() => cards[eggIdx].classList.remove('shake'), 300); }
+      toast('Cliques insuficientes! Faltam ' + fmt(egg.cost - state.clicks));
+    }
+    return [];
+  }
+  tocarSomOvo();
+  updateUI(); save();
+  if (state.automation.autoEquip) applyAutoEquip();
+
+  if (silent) {
+    const rare = opened.find(p => p.rarity === 'mitico') || opened.find(p => p.rarity === 'lendario');
+    if (rare) {
+      const wasActive = state.automation.autoOpenActive;
+      if (wasActive) stopAutoOpen(true);
+      playEggAnimation(rare, () => {
+        if (wasActive) {
+          state.automation.autoOpenActive = true;
+          const btn = document.getElementById('autoOpenBtn');
+          if (btn) { btn.textContent = '⏸️'; btn.classList.add('active'); }
+          startAutoOpen();
+        }
+      });
+    }
+    return opened;
+  }
+
+  if (opened.length === 1) playEggAnimation(opened[0]);
+  else showMultiReveal(opened);
+  return opened;
+}
+
+function playEggAnimation(pet, onDone) {
   const modal = document.getElementById('eggOpenModal');
   const eggEl = document.getElementById('eggOpenEmoji');
   const particles = document.getElementById('particles');
+  if (!modal || !eggEl || !particles) { if (onDone) onDone(); return; }
   const rarity = RARITIES[pet.rarity];
-
-  eggEl.textContent = '🥚';
-  eggEl.className = 'egg-open-egg';
-  eggEl.style.filter = '';
-  particles.innerHTML = '';
+  eggEl.textContent = '🥚'; eggEl.className = 'egg-open-egg'; eggEl.style.filter = ''; particles.innerHTML = '';
   modal.classList.add('show');
-
   void eggEl.offsetWidth;
   eggEl.classList.add('shaking');
-
-  setTimeout(() => {
-    eggEl.classList.add('glowing');
-    burstParticles(particles, rarity.color, 12, 50, 80);
-  }, 850);
-
+  setTimeout(() => { eggEl.classList.add('glowing'); burstParticles(particles, rarity.color, 12, 50, 80); }, 850);
   setTimeout(() => {
     eggEl.classList.add('bursting');
     burstParticles(particles, rarity.color, 46, 100, 220);
@@ -1233,15 +1550,12 @@ function playEggAnimation(pet) {
     setTimeout(() => document.body.classList.remove('screen-shake'), 400);
     if (pet.rarity === 'lendario' || pet.rarity === 'mitico') {
       launchFireworks(rarity.color, 3200, pet.rarity === 'mitico');
-      playFanfare(pet.rarity);
     }
   }, 1500);
-
   setTimeout(() => {
-    modal.classList.remove('show');
-    eggEl.className = 'egg-open-egg';
-    particles.innerHTML = '';
+    modal.classList.remove('show'); eggEl.className = 'egg-open-egg'; particles.innerHTML = '';
     showReveal(pet);
+    if (onDone) onDone();
   }, 2000);
 }
 
@@ -1254,33 +1568,24 @@ function burstParticles(container, color, count, minDist, maxDist) {
     p.style.setProperty('--dx', (Math.cos(angle) * dist).toFixed(1) + 'px');
     p.style.setProperty('--dy', (Math.sin(angle) * dist).toFixed(1) + 'px');
     const size = 4 + Math.random() * 8;
-    p.style.width = size + 'px';
-    p.style.height = size + 'px';
-    p.style.background = color;
-    p.style.color = color;
+    p.style.width = size + 'px'; p.style.height = size + 'px';
+    p.style.background = color; p.style.color = color;
     p.style.animationDelay = (Math.random() * 0.12).toFixed(2) + 's';
     p.style.animationDuration = (0.7 + Math.random() * 0.5).toFixed(2) + 's';
-    container.appendChild(p);
-    setTimeout(() => p.remove(), 1400);
+    container.appendChild(p); setTimeout(() => p.remove(), 1400);
   }
 }
+
 function launchFireworks(color, duration, isMitico) {
-  const overlay = document.getElementById('fireworks');
-  overlay.classList.add('show');
-  if (isMitico) overlay.classList.add('tint');
+  const overlay = document.getElementById('fireworks'); if (!overlay) return;
+  overlay.classList.add('show'); if (isMitico) overlay.classList.add('tint');
   overlay.innerHTML = '';
   const startTime = Date.now();
   const colors = ['#ff6b6b','#feca57','#48dbfb','#1dd1a1','#f368e0','#fbbf24', color];
   function loop() {
-    if (Date.now() - startTime > duration) {
-      overlay.classList.remove('show', 'tint');
-      overlay.innerHTML = '';
-      return;
-    }
-    const xPct = 10 + Math.random() * 80;
-    const yPct = 15 + Math.random() * 55;
-    createBurst(overlay, xPct, yPct, colors);
-    setTimeout(loop, isMitico ? 180 + Math.random() * 200 : 260 + Math.random() * 260);
+    if (Date.now() - startTime > duration) { overlay.classList.remove('show', 'tint'); overlay.innerHTML = ''; return; }
+    createBurst(overlay, 10 + Math.random()*80, 15 + Math.random()*55, colors);
+    setTimeout(loop, isMitico ? 180 + Math.random()*200 : 260 + Math.random()*260);
   }
   loop();
 }
@@ -1292,245 +1597,232 @@ function createBurst(container, xPct, yPct, colors) {
   for (let i = 0; i < count; i++) {
     const p = document.createElement('div');
     const c = colors[Math.floor(Math.random() * colors.length)];
-    p.style.cssText = 'position:absolute;width:7px;height:7px;border-radius:50%;' +
-      'background:'+c+';box-shadow:0 0 10px '+c+',0 0 22px '+c+';';
+    p.style.cssText = 'position:absolute;width:7px;height:7px;border-radius:50%;background:'+c+';box-shadow:0 0 10px '+c+',0 0 22px '+c+';';
     const angle = (Math.PI * 2 * i) / count + Math.random() * 0.3;
     const dist = 90 + Math.random() * 130;
-    const dx = Math.cos(angle) * dist;
-    const dy = Math.sin(angle) * dist;
     p.animate([
-      { transform: 'translate(-50%,-50%) scale(1)', opacity: 1 },
-      { transform: 'translate(calc(-50% + '+dx+'px), calc(-50% + '+dy+'px)) scale(0)', opacity: 0 }
-    ], { duration: 900 + Math.random() * 500, easing: 'cubic-bezier(.2,.8,.5,1)' });
+      { transform:'translate(-50%,-50%) scale(1)', opacity:1 },
+      { transform:'translate(calc(-50% + '+(Math.cos(angle)*dist)+'px), calc(-50% + '+(Math.sin(angle)*dist)+'px)) scale(0)', opacity:0 }
+    ], { duration: 900 + Math.random()*500, easing:'cubic-bezier(.2,.8,.5,1)' });
     burst.appendChild(p);
   }
   setTimeout(() => burst.remove(), 1600);
 }
 
-let audioCtx = null;
-function getAudioCtx() {
-  if (!audioCtx) {
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) return null;
-    audioCtx = new AC();
-  }
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-  return audioCtx;
-}
-function playFanfare(rarity) {
-  try {
-    const ctx = getAudioCtx();
-    if (!ctx) return;
-    const now = ctx.currentTime;
-    const isMitico = rarity === 'mitico';
-    const notes = isMitico
-      ? [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98]
-      : [392.00, 523.25, 659.25, 783.99];
-    notes.forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = isMitico ? 'sawtooth' : 'triangle';
-      osc.frequency.value = freq;
-      const start = now + i * (isMitico ? 0.09 : 0.12);
-      gain.gain.setValueAtTime(0, start);
-      gain.gain.linearRampToValueAtTime(isMitico ? 0.11 : 0.09, start + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.65);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(start);
-      osc.stop(start + 0.75);
-    });
-    const bass = ctx.createOscillator();
-    const bassGain = ctx.createGain();
-    bass.type = 'sine';
-    bass.frequency.setValueAtTime(isMitico ? 130.81 : 98, now);
-    bass.frequency.exponentialRampToValueAtTime(isMitico ? 261.63 : 196, now + 1.2);
-    bassGain.gain.setValueAtTime(0, now);
-    bassGain.gain.linearRampToValueAtTime(0.18, now + 0.04);
-    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
-    bass.connect(bassGain).connect(ctx.destination);
-    bass.start(now);
-    bass.stop(now + 1.5);
-    if (isMitico) {
-      const bell = ctx.createOscillator();
-      const bellGain = ctx.createGain();
-      bell.type = 'sine';
-      bell.frequency.value = 2093.00;
-      bellGain.gain.setValueAtTime(0, now + 0.5);
-      bellGain.gain.linearRampToValueAtTime(0.06, now + 0.52);
-      bellGain.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
-      bell.connect(bellGain).connect(ctx.destination);
-      bell.start(now + 0.5);
-      bell.stop(now + 2.1);
-    }
-  } catch(e) { console.warn('Audio:', e); }
-}
-
 function showReveal(pet) {
   const r = RARITIES[pet.rarity];
-  const card = document.getElementById('revealCard');
+  const card = document.getElementById('revealCard'); if (!card) return;
   card.style.borderColor = r.color;
   card.style.boxShadow = '0 0 60px ' + r.glow + ', 0 0 120px ' + r.glow;
-  const rEl = document.getElementById('revealRarity');
-  rEl.textContent = r.name;
-  rEl.style.color = r.color;
+  const rEl = document.getElementById('revealRarity'); rEl.textContent = r.name; rEl.style.color = r.color;
   document.getElementById('revealEmoji').textContent = pet.emoji;
-  const nEl = document.getElementById('revealName');
-  nEl.textContent = getDisplayName(pet);
-  nEl.style.color = r.color;
+  const nEl = document.getElementById('revealName'); nEl.textContent = getDisplayName(pet); nEl.style.color = r.color;
   document.getElementById('revealMult').textContent = '+' + fmtMult(getDisplayMult(pet)) + ' por clique';
   document.getElementById('revealModal').classList.add('show');
 }
-function closeReveal() { document.getElementById('revealModal').classList.remove('show'); }
+function closeReveal() { const m = document.getElementById('revealModal'); if (m) m.classList.remove('show'); }
 
+function showMultiReveal(pets) {
+  const card = document.getElementById('multiRevealCard'), list = document.getElementById('multiRevealList'), title = document.getElementById('multiRevealTitle');
+  if (!card || !list) return;
+  let bestRarity = 'comum';
+  const rOrder = {}; RARITY_ORDER.forEach((k,i) => rOrder[k] = i);
+  pets.forEach(p => { if (rOrder[p.rarity] > rOrder[bestRarity]) bestRarity = p.rarity; });
+  const r = RARITIES[bestRarity];
+  card.style.borderColor = r.color; card.style.boxShadow = '0 0 60px ' + r.glow + ', 0 0 120px ' + r.glow;
+  title.textContent = '🥚 ' + pets.length + ' Pets'; title.style.color = r.color;
+  list.innerHTML = '';
+  pets.sort((a,b) => rOrder[b.rarity] - rOrder[a.rarity]);
+  pets.forEach(p => {
+    const pr = RARITIES[p.rarity];
+    const item = document.createElement('div');
+    item.className = 'mr-item'; item.style.borderLeftColor = pr.color;
+    item.innerHTML = '<span class="mr-emoji">' + p.emoji + '</span>' +
+      '<div class="mr-info"><div class="mr-name" style="color:' + pr.color + '">' + getDisplayName(p) + '</div>' +
+      '<div class="mr-rarity" style="color:' + pr.color + '">' + pr.name + '</div></div>' +
+      '<div class="mr-mult">+' + fmtMult(getDisplayMult(p)) + '</div>';
+    list.appendChild(item);
+  });
+  document.getElementById('multiRevealModal').classList.add('show');
+}
+function closeMultiReveal() { const m = document.getElementById('multiRevealModal'); if (m) m.classList.remove('show'); }
+
+/* ============ AUTOMAÇÃO ============ */
+function applyAutoEquip() {
+  if (!state.automation.autoEquip) return;
+  const sorted = [...state.pets].sort((a,b) => getDisplayMult(b) - getDisplayMult(a));
+  const top4Uids = new Set(sorted.slice(0, MAX_EQUIPPED).map(p => p.uid));
+  state.pets.forEach(p => { p.equipped = top4Uids.has(p.uid); });
+}
+function toggleAutoEquip() {
+  state.automation.autoEquip = !state.automation.autoEquip;
+  const btn = document.getElementById('autoEquipBtn');
+  if (btn) btn.classList.toggle('active', state.automation.autoEquip);
+  if (state.automation.autoEquip) { applyAutoEquip(); toast('🎯 Auto Equip ativado'); }
+  else toast('⏹️ Auto Equip desativado');
+  updateUI(); save();
+}
+let autoFusionInterval = null;
+function toggleAutoFusion() {
+  state.automation.autoFusion = !state.automation.autoFusion;
+  const btn = document.getElementById('autoFusionBtn');
+  if (btn) btn.classList.toggle('active', state.automation.autoFusion);
+  if (state.automation.autoFusion) {
+    toast('⚡ Auto Fusão ativada');
+    if (!autoFusionInterval) autoFusionInterval = setInterval(runAutoFusion, 700);
+  } else {
+    toast('⏹️ Auto Fusão desativada');
+    if (autoFusionInterval) { clearInterval(autoFusionInterval); autoFusionInterval = null; }
+  }
+  save();
+}
+function runAutoFusion() {
+  if (!state.automation.autoFusion) return;
+  const inv = state.pets.filter(p => !p.equipped);
+  const groups = {};
+  inv.forEach(p => { const k = getPetGroupKey(p); (groups[k] = groups[k] || []).push(p); });
+  const fusible = Object.entries(groups).filter(([k,arr]) => arr.length >= 3);
+  if (fusible.length === 0) return;
+  fusePets(fusible[0][0], true);
+}
+function setEggMultiplier(n) {
+  state.automation.eggMultiplier = n;
+  [1,2,3].forEach(i => { const btn = document.getElementById('eggMult' + i); if (btn) btn.classList.toggle('active', i === n); });
+  save();
+}
+let autoOpenInterval = null;
+function toggleAutoOpen() {
+  if (state.automation.autoOpenActive) { stopAutoOpen(); toast('⏹️ Auto Open parado'); return; }
+  if (!state.automation.autoOpenTarget) { toast('🎯 Clica num ovo para escolher o alvo'); return; }
+  state.automation.autoOpenActive = true;
+  state.automation.autoOpenedCount = 0;
+  const btn = document.getElementById('autoOpenBtn'); if (btn) { btn.textContent = '⏸️'; btn.classList.add('active'); }
+  const counter = document.getElementById('autoCounter'); if (counter) counter.classList.add('show');
+  updateAutoCounter(); startAutoOpen(); save();
+}
+function stopAutoOpen(silent) {
+  state.automation.autoOpenActive = false;
+  if (autoOpenInterval) { clearInterval(autoOpenInterval); autoOpenInterval = null; }
+  const btn = document.getElementById('autoOpenBtn'); if (btn) { btn.textContent = '▶️'; btn.classList.remove('active'); }
+  const counter = document.getElementById('autoCounter'); if (counter) counter.classList.remove('show');
+  if (!silent) { updateUI(); save(); }
+}
+function startAutoOpen() {
+  if (autoOpenInterval) clearInterval(autoOpenInterval);
+  autoOpenInterval = setInterval(() => {
+    if (!state.automation.autoOpenActive) { stopAutoOpen(); return; }
+    const t = state.automation.autoOpenTarget; if (!t) { stopAutoOpen(); return; }
+    const egg = WORLDS[t.w].eggs[t.e];
+    let count = 0;
+    if (state.clicks >= egg.cost * 3) count = 3;
+    else if (state.clicks >= egg.cost * 2) count = 2;
+    else if (state.clicks >= egg.cost) count = 1;
+    if (count === 0) { stopAutoOpen(); toast('⏹️ Auto parou: sem cliques suficientes'); return; }
+    const opened = openEggsBatch(t.w, t.e, count, true);
+    state.automation.autoOpenedCount += opened.length;
+    updateAutoCounter();
+  }, 700);
+}
+function updateAutoCounter() { const el = document.getElementById('autoCounterCount'); if (el) el.textContent = state.automation.autoOpenedCount; }
+
+/* ============ EQUIPAR / VENDER / FUNDIR ============ */
 function toggleEquip(uid) {
-  const pet = state.pets.find(p => p.uid === uid);
-  if (!pet) return;
-  if (pet.equipped) { pet.equipped = false; }
+  if (state.automation.autoEquip) { toast('⚠️ Auto Equip está ativo — desliga primeiro'); return; }
+  const pet = state.pets.find(p => p.uid === uid); if (!pet) return;
+  if (pet.equipped) pet.equipped = false;
   else {
-    if (state.pets.filter(p => p.equipped).length >= MAX_EQUIPPED) {
-      toast('Máximo de ' + MAX_EQUIPPED + ' pets equipados!');
-      return;
-    }
+    if (state.pets.filter(p => p.equipped).length >= MAX_EQUIPPED) { toast('Máximo de ' + MAX_EQUIPPED + ' pets equipados!'); return; }
     pet.equipped = true;
   }
-  updateUI();
-  save();
+  updateUI(); save();
 }
-
-/* ============ REBIRTH ============ */
 function doRebirth() {
   const cost = getRebirthCost();
-  if (state.clicks < cost) {
-    const falta = cost - state.clicks;
-    toast('❌ Precisas de ' + fmt(cost) + ' cliques. Faltam ' + fmt(falta) + '!');
-    return;
-  }
-  const confirmMsg =
-    '🔄 FAZER REBIRTH #' + (state.rebirths + 1) + '?\n\n' +
-    '💸 Custo: ' + fmt(cost) + ' cliques\n' +
-    '✅ Ganho: +0.5× permanente em todos os cliques\n\n' +
-    '⚠️ Vais PERDER todos os cliques atuais (os pets ficam!).\n\n' +
-    'Continuar?';
-  if (!confirm(confirmMsg)) return;
-
-  state.clicks = 0;
-  state.rebirths++;
-  toast('✨ Rebirth #' + state.rebirths + ' feito! Multiplicador: ' + (1 + state.rebirths * 0.5).toFixed(1) + '×');
-  updateUI();
-  save();
-  enviarPontuacao();
+  if (state.clicks < cost) { toast('❌ Precisas de ' + fmt(cost) + ' cliques. Faltam ' + fmt(cost - state.clicks) + '!'); return; }
+  const ok = window.confirm('🔄 FAZER REBIRTH #' + (state.rebirths + 1) + '?\n\n💸 Custo: ' + fmt(cost) + ' cliques\n✅ Ganho: +0.5× permanente\n\n⚠️ Vais PERDER todos os cliques.\n\nContinuar?');
+  if (!ok) return;
+  state.clicks = 0; state.rebirths++;
+  toast('✨ Rebirth #' + state.rebirths + ' feito!');
+  updateUI(); save(); enviarPontuacao();
   launchFireworks('#a855f7', 2500, true);
-  playFanfare('mitico');
 }
-
 function selectWorld(i) {
-  if (!isWorldUnlocked(i)) {
-    toast('🔒 Precisas de ' + WORLDS[i].unlock + ' rebirth(s). Tens ' + state.rebirths + '.');
-    return;
-  }
-  state.currentWorld = i;
-  updateUI();
-  save();
+  if (!isWorldUnlocked(i)) { toast('🔒 Precisas de ' + WORLDS[i].unlock + ' rebirth(s). Tens ' + state.rebirths + '.'); return; }
+  state.currentWorld = i; updateUI(); save();
 }
-
 function sellPet(uid, evt) {
   if (evt) evt.stopPropagation();
-  const idx = state.pets.findIndex(p => p.uid === uid);
-  if (idx === -1) return;
-  const pet = state.pets[idx];
-  const price = getSellPrice(pet);
-  state.pets.splice(idx, 1);
-  state.clicks += price;
+  const idx = state.pets.findIndex(p => p.uid === uid); if (idx === -1) return;
+  const pet = state.pets[idx]; const price = getSellPrice(pet);
+  state.pets.splice(idx, 1); state.clicks += price;
   toast('💰 Vendeste ' + getDisplayName(pet) + ' por ' + fmt(price));
-  updateUI();
-  save();
+  updateUI(); save();
 }
 function sellAllDuplicates() {
   const inv = state.pets.filter(p => !p.equipped);
   const groups = {};
-  inv.forEach(p => {
-    const k = getPetGroupKey(p);
-    (groups[k] = groups[k] || []).push(p);
-  });
-  let totalMoney = 0;
-  let totalSold = 0;
+  inv.forEach(p => { const k = getPetGroupKey(p); (groups[k] = groups[k] || []).push(p); });
+  let totalMoney = 0, totalSold = 0;
   const toRemove = new Set();
   Object.values(groups).forEach(arr => {
     if (arr.length < 2) return;
     arr.sort((a,b) => getDisplayMult(b) - getDisplayMult(a));
-    for (let i = 1; i < arr.length; i++) {
-      toRemove.add(arr[i].uid);
-      totalMoney += getSellPrice(arr[i]);
-      totalSold++;
-    }
+    for (let i = 1; i < arr.length; i++) { toRemove.add(arr[i].uid); totalMoney += getSellPrice(arr[i]); totalSold++; }
   });
-  if (totalSold === 0) { toast('Não tens duplicados para vender!'); return; }
+  if (totalSold === 0) { toast('Não tens duplicados!'); return; }
   state.pets = state.pets.filter(p => !toRemove.has(p.uid));
   state.clicks += totalMoney;
   toast('💰 Vendeste ' + totalSold + ' pets por ' + fmt(totalMoney));
-  updateUI();
-  save();
+  updateUI(); save();
 }
-function fusePets(groupKey) {
+function fusePets(groupKey, silent) {
   const inv = state.pets.filter(p => !p.equipped);
   const group = inv.filter(p => getPetGroupKey(p) === groupKey);
-  if (group.length < 3) { toast('Precisas de 3 cópias iguais no inventário!'); return; }
+  if (group.length < 3) { if (!silent) toast('Precisas de 3 cópias iguais!'); return; }
   group.sort((a,b) => a.uid - b.uid);
   const used = group.slice(0, 3);
   const usedUids = new Set(used.map(p => p.uid));
-  const base = used[0];
-  const newLevel = (base.fusionLevel || 0) + 1;
+  const base = used[0]; const newLevel = (base.fusionLevel || 0) + 1;
   state.pets = state.pets.filter(p => !usedUids.has(p.uid));
-  const fused = {
-    uid: ++state.petUid,
-    name: base.name, emoji: base.emoji, mult: base.mult,
-    rarity: base.rarity, equipped: false, fusionLevel: newLevel,
-  };
+  const fused = { uid: ++state.petUid, name: base.name, emoji: base.emoji, mult: base.mult, rarity: base.rarity, equipped: false, fusionLevel: newLevel };
   state.pets.push(fused);
-  toast('🧬 ' + getDisplayName(fused) + ' criado! (+' + fmtMult(getDisplayMult(fused)) + '/clique)');
-  updateUI();
-  save();
-  renderFusion();
+  if (!silent) toast('🧬 ' + getDisplayName(fused) + ' criado!');
+  updateUI(); save();
+  const fusionModal = document.getElementById('fusionModal'); if (fusionModal && fusionModal.classList.contains('show')) renderFusion();
 }
 
 /* ============ RENDER ============ */
-
 function updateUI() {
   document.getElementById('uiClicks').textContent = fmt(state.clicks);
   document.getElementById('uiCpc').textContent = fmtMult(getCPC());
   document.getElementById('uiRebirths').textContent = state.rebirths;
-
-  const rBtn = document.getElementById('rebirthBtn');
-  const rCost = getRebirthCost();
+  const rBtn = document.getElementById('rebirthBtn'); const rCost = getRebirthCost();
   const ready = state.clicks >= rCost;
   rBtn.textContent = '🔄 Rebirth (' + fmt(rCost) + ')';
   rBtn.classList.toggle('not-ready', !ready);
-
   document.getElementById('btnCpc').textContent = '+' + fmtMult(getCPC()) + ' por clique';
 
-  const wl = document.getElementById('worldList');
-  wl.innerHTML = '';
+  const wl = document.getElementById('worldList'); wl.innerHTML = '';
   WORLDS.forEach((w, i) => {
     const unlocked = isWorldUnlocked(i);
     const btn = document.createElement('button');
     btn.className = 'world-btn' + (i === state.currentWorld ? ' active' : '') + (unlocked ? '' : ' locked');
     btn.innerHTML = '<span class="w-emoji">' + (unlocked ? w.emoji : '🔒') + '</span><span>' + w.name + '</span>' +
       (unlocked ? '' : '<span class="w-lock">' + w.unlock + ' 🔄</span>');
-    btn.onclick = () => selectWorld(i);
-    wl.appendChild(btn);
+    btn.onclick = () => selectWorld(i); wl.appendChild(btn);
   });
 
   const cw = WORLDS[state.currentWorld];
   const banner = document.getElementById('worldBanner');
-  banner.textContent = cw.emoji + ' Mundo ' + cw.name;
-  banner.style.background = cw.theme;
+  banner.textContent = cw.emoji + ' Mundo ' + cw.name; banner.style.background = cw.theme;
 
-  const eggList = document.getElementById('eggList');
-  eggList.innerHTML = '';
+  const eggList = document.getElementById('eggList'); eggList.innerHTML = '';
+  const target = state.automation.autoOpenTarget;
   cw.eggs.forEach((egg, i) => {
     const ok = state.clicks >= egg.cost;
+    const isTarget = target && target.w === state.currentWorld && target.e === i;
     const card = document.createElement('div');
-    card.className = 'egg-card' + (ok ? '' : ' cant-afford');
+    card.className = 'egg-card' + (ok ? '' : ' cant-afford') + (isTarget ? ' auto-target' : '');
     card.innerHTML = '<span class="egg-emoji">' + egg.emoji + '</span>' +
       '<div class="egg-name">' + egg.name + '</div>' +
       '<div class="egg-cost">💰 ' + fmt(egg.cost) + '</div>';
@@ -1540,68 +1832,53 @@ function updateUI() {
 
   const eq = state.pets.filter(p => p.equipped);
   document.getElementById('equipCount').textContent = eq.length;
-  const slots = document.getElementById('equippedSlots');
-  slots.innerHTML = '';
+  const slots = document.getElementById('equippedSlots'); slots.innerHTML = '';
   for (let i = 0; i < MAX_EQUIPPED; i++) {
     const slot = document.createElement('div');
     if (i < eq.length) {
-      const p = eq[i];
-      const r = RARITIES[p.rarity];
+      const p = eq[i]; const r = RARITIES[p.rarity];
       slot.className = 'equip-slot filled';
-      slot.style.borderColor = r.color;
-      slot.style.boxShadow = 'inset 0 0 12px ' + r.glow;
+      slot.style.borderColor = r.color; slot.style.boxShadow = 'inset 0 0 12px ' + r.glow;
       slot.innerHTML = '<div>' + p.emoji + '</div>' +
         '<div class="p-name" style="color:' + r.color + '">' + getDisplayName(p) + '</div>' +
         '<div class="p-mult">+' + fmtMult(getDisplayMult(p)) + '</div>';
       slot.onclick = () => toggleEquip(p.uid);
-    } else {
-      slot.className = 'equip-slot';
-      slot.textContent = '＋';
-    }
+    } else { slot.className = 'equip-slot'; slot.textContent = '＋'; }
     slots.appendChild(slot);
   }
 
   const inv = state.pets.filter(p => !p.equipped);
   document.getElementById('invCount').textContent = inv.length;
-
   const dupGroups = {};
-  inv.forEach(p => {
-    const k = getPetGroupKey(p);
-    dupGroups[k] = (dupGroups[k] || 0) + 1;
-  });
+  inv.forEach(p => { const k = getPetGroupKey(p); dupGroups[k] = (dupGroups[k] || 0) + 1; });
   const hasDupes = Object.values(dupGroups).some(c => c >= 2);
   document.getElementById('sellDupesBtn').style.display = hasDupes ? 'block' : 'none';
 
-  const invList = document.getElementById('inventoryList');
-  invList.innerHTML = '';
+  const invList = document.getElementById('inventoryList'); invList.innerHTML = '';
   if (!inv.length) {
     invList.innerHTML = '<div class="empty-msg">Sem pets no inventário.<br>Abre ovos para conseguires pets!</div>';
   } else {
-    const rOrder = {};
-    RARITY_ORDER.forEach((k,i) => rOrder[k] = i);
+    const rOrder = {}; RARITY_ORDER.forEach((k,i) => rOrder[k] = i);
     inv.sort((a,b) => {
       const ro = rOrder[a.rarity] - rOrder[b.rarity];
       if (ro) return ro;
       return getDisplayMult(b) - getDisplayMult(a);
     });
     inv.forEach(p => {
-      const r = RARITIES[p.rarity];
-      const price = getSellPrice(p);
+      const r = RARITIES[p.rarity]; const price = getSellPrice(p);
       const item = document.createElement('div');
-      item.className = 'pet-item';
-      item.style.borderLeftColor = r.color;
-      item.innerHTML =
-        '<span class="pi-emoji">' + p.emoji + '</span>' +
-        '<div class="pi-info">' +
-          '<div class="pi-name">' + getDisplayName(p) + '</div>' +
-          '<div class="pi-rarity" style="color:' + r.color + '">' + r.name + '</div>' +
-        '</div>' +
+      item.className = 'pet-item'; item.style.borderLeftColor = r.color;
+      item.innerHTML = '<span class="pi-emoji">' + p.emoji + '</span>' +
+        '<div class="pi-info"><div class="pi-name">' + getDisplayName(p) + '</div>' +
+        '<div class="pi-rarity" style="color:' + r.color + '">' + r.name + '</div></div>' +
         '<div class="pi-mult">+' + fmtMult(getDisplayMult(p)) + '</div>';
+      const giftBtn = document.createElement('button');
+      giftBtn.className = 'pi-gift'; giftBtn.textContent = '🎁'; giftBtn.title = 'Oferecer';
+      giftBtn.onclick = (e) => { e.stopPropagation(); openSendGift(p.uid); };
+      item.appendChild(giftBtn);
       const sellBtn = document.createElement('button');
-      sellBtn.className = 'pi-sell';
-      sellBtn.textContent = '💰';
-      sellBtn.title = 'Vender por ' + fmt(price);
-      sellBtn.onclick = (e) => sellPet(p.uid, e);
+      sellBtn.className = 'pi-sell'; sellBtn.textContent = '💰'; sellBtn.title = 'Vender por ' + fmt(price);
+      sellBtn.onclick = (e) => { e.stopPropagation(); sellPet(p.uid, e); };
       item.appendChild(sellBtn);
       item.onclick = () => toggleEquip(p.uid);
       invList.appendChild(item);
@@ -1615,135 +1892,93 @@ function getAllPetDefs() {
   WORLDS.forEach((w, wi) => {
     w.eggs.forEach((egg) => {
       Object.entries(egg.pets).forEach(([rarity, list]) => {
-        list.forEach(p => {
-          arr.push({ key: p[0]+'|'+p[1], world: wi, worldName: w.name, worldEmoji: w.emoji,
-            eggName: egg.name, rarity, name: p[0], emoji: p[1], mult: p[2] });
-        });
+        list.forEach(p => arr.push({ key: p[0]+'|'+p[1], world: wi, rarity, name: p[0], emoji: p[1], mult: p[2] }));
       });
     });
   });
   return arr;
 }
 function openCollection() {
-  const defs = getAllPetDefs();
-  const counts = {};
-  state.pets.forEach(p => {
-    const key = p.name + '|' + p.emoji;
-    counts[key] = (counts[key] || 0) + 1;
-  });
-  const foundCount = defs.filter(d => counts[d.key]).length;
-  const total = defs.length;
+  const defs = getAllPetDefs(); const counts = {};
+  state.pets.forEach(p => { const key = p.name + '|' + p.emoji; counts[key] = (counts[key] || 0) + 1; });
+  const foundCount = defs.filter(d => counts[d.key]).length; const total = defs.length;
   document.getElementById('collectProgressText').textContent = foundCount + ' / ' + total;
   document.getElementById('collectProgressFill').style.width = total ? (foundCount / total * 100) + '%' : '0%';
-  const body = document.getElementById('collectionBody');
-  body.innerHTML = '';
-  const rOrder = {};
-  RARITY_ORDER.forEach((k,i) => rOrder[k] = i);
+  const body = document.getElementById('collectionBody'); body.innerHTML = '';
+  const rOrder = {}; RARITY_ORDER.forEach((k,i) => rOrder[k] = i);
   WORLDS.forEach((w, wi) => {
-    const worldDefs = defs.filter(d => d.world === wi)
-      .sort((a,b) => rOrder[a.rarity] - rOrder[b.rarity] || b.mult - a.mult);
+    const worldDefs = defs.filter(d => d.world === wi).sort((a,b) => rOrder[a.rarity] - rOrder[b.rarity] || b.mult - a.mult);
     const found = worldDefs.filter(d => counts[d.key]).length;
-    const section = document.createElement('div');
-    section.className = 'world-section';
-    const title = document.createElement('div');
-    title.className = 'world-section-title';
-    title.innerHTML = w.emoji + ' ' + w.name +
-      ' <span class="ws-count"><b>' + found + '</b>/' + worldDefs.length + '</span>';
+    const section = document.createElement('div'); section.className = 'world-section';
+    const title = document.createElement('div'); title.className = 'world-section-title';
+    title.innerHTML = w.emoji + ' ' + w.name + ' <span class="ws-count"><b>' + found + '</b>/' + worldDefs.length + '</span>';
     section.appendChild(title);
-    const grid = document.createElement('div');
-    grid.className = 'collection-grid';
+    const grid = document.createElement('div'); grid.className = 'collection-grid';
     worldDefs.forEach(d => {
-      const r = RARITIES[d.rarity];
-      const count = counts[d.key] || 0;
+      const r = RARITIES[d.rarity]; const count = counts[d.key] || 0;
       const item = document.createElement('div');
       if (count) {
         item.className = 'collect-item found';
-        item.style.borderColor = r.color;
-        item.style.boxShadow = 'inset 0 0 10px ' + r.glow;
-        item.title = d.name + ' (' + r.name + ') — +' + fmtMult(d.mult) + '/clique — ' + count + 'x';
+        item.style.borderColor = r.color; item.style.boxShadow = 'inset 0 0 10px ' + r.glow;
+        item.title = d.name + ' (' + r.name + ')';
         item.innerHTML = '<span class="ci-emoji">' + d.emoji + '</span>' +
           '<div class="ci-name" style="color:' + r.color + '">' + d.name + '</div>' +
-          '<div class="ci-rarity" style="color:' + r.color + ';opacity:.9">' + r.name + '</div>' +
+          '<div class="ci-rarity" style="color:' + r.color + '">' + r.name + '</div>' +
           '<div class="ci-count">' + count + '</div>';
       } else {
         item.className = 'collect-item locked';
-        item.title = '??? (' + r.name + ') — ainda não descoberto';
         item.innerHTML = '<span class="ci-emoji">' + d.emoji + '</span>' +
           '<div class="ci-name" style="color:' + r.color + ';opacity:.7">???</div>' +
           '<div class="ci-rarity" style="color:' + r.color + ';opacity:.5">' + r.name + '</div>';
       }
       grid.appendChild(item);
     });
-    section.appendChild(grid);
-    body.appendChild(section);
+    section.appendChild(grid); body.appendChild(section);
   });
   document.getElementById('collectionModal').classList.add('show');
 }
-function closeCollection() { document.getElementById('collectionModal').classList.remove('show'); }
+function closeCollection() { const m = document.getElementById('collectionModal'); if (m) m.classList.remove('show'); }
 
 /* ============ FUSÃO ============ */
-function openFusion() { document.getElementById('fusionModal').classList.add('show'); renderFusion(); }
-function closeFusion() { document.getElementById('fusionModal').classList.remove('show'); }
+function openFusion() {
+  document.getElementById('fusionModal').classList.add('show');
+  const btn = document.getElementById('autoFusionBtn'); if (btn) btn.classList.toggle('active', state.automation.autoFusion);
+  renderFusion();
+}
+function closeFusion() { const m = document.getElementById('fusionModal'); if (m) m.classList.remove('show'); }
 function renderFusion() {
-  const body = document.getElementById('fusionBody');
-  body.innerHTML = '';
-  const info = document.createElement('div');
-  info.className = 'fusion-info-box';
-  info.innerHTML = '🧬 Junta <b>3 pets iguais</b> (mesmo nome + nível) → 1 pet melhorado com <b>×' + FUSION_FACTOR + '</b> de multiplicador. ' +
-    'Só pets no <b>inventário</b> contam (desequipa para fundir). Pets já fundidos ficam com ⭐ no nome.';
+  const body = document.getElementById('fusionBody'); body.innerHTML = '';
+  const info = document.createElement('div'); info.className = 'fusion-info-box';
+  info.innerHTML = '🧬 Junta <b>3 pets iguais</b> → pet ×' + FUSION_FACTOR + ' mais forte. Só pets no inventário contam.';
   body.appendChild(info);
-  const inv = state.pets.filter(p => !p.equipped);
-  const groups = {};
-  inv.forEach(p => {
-    const k = getPetGroupKey(p);
-    if (!groups[k]) groups[k] = [];
-    groups[k].push(p);
-  });
+  const inv = state.pets.filter(p => !p.equipped); const groups = {};
+  inv.forEach(p => { const k = getPetGroupKey(p); if (!groups[k]) groups[k] = []; groups[k].push(p); });
   const fusible = Object.entries(groups).filter(([k, arr]) => arr.length >= 3);
   if (fusible.length === 0) {
-    body.innerHTML += '<div class="empty-msg-big">Ainda não tens 3 cópias iguais no inventário para fundir.<br><br>Continua a abrir ovos! 🥚</div>';
-    return;
+    body.innerHTML += '<div class="empty-msg-big">Sem 3 cópias iguais no inventário.<br>Continua a abrir ovos! 🥚</div>'; return;
   }
-  const rOrder = {};
-  RARITY_ORDER.forEach((k,i) => rOrder[k] = i);
+  const rOrder = {}; RARITY_ORDER.forEach((k,i) => rOrder[k] = i);
   fusible.sort(([ka, arrA], [kb, arrB]) => {
-    const a = arrA[0], b = arrB[0];
-    const ro = rOrder[a.rarity] - rOrder[b.rarity];
-    if (ro) return ro;
-    return getDisplayMult(b) - getDisplayMult(a);
+    const a = arrA[0], b = arrB[0]; const ro = rOrder[a.rarity] - rOrder[b.rarity];
+    if (ro) return ro; return getDisplayMult(b) - getDisplayMult(a);
   });
   fusible.forEach(([key, arr]) => {
-    const base = arr[0];
-    const r = RARITIES[base.rarity];
-    const currentMult = getDisplayMult(base);
-    const nextMult = currentMult * FUSION_FACTOR;
-    const row = document.createElement('div');
-    row.className = 'fusion-row';
-    row.style.borderLeftColor = r.color;
-    row.innerHTML =
-      '<div class="fusion-pet">' +
-        '<span class="fp-emoji">' + base.emoji + '</span>' +
-        '<div class="fp-info">' +
-          '<div class="fp-name" style="color:' + r.color + '">' + getDisplayName(base) + '</div>' +
-          '<div class="fp-meta">' + r.name + ' · +' + fmtMult(currentMult) + ' → <b>+' + fmtMult(nextMult) + '</b>/clique</div>' +
-        '</div>' +
-      '</div>' +
+    const base = arr[0]; const r = RARITIES[base.rarity];
+    const currentMult = getDisplayMult(base); const nextMult = currentMult * FUSION_FACTOR;
+    const row = document.createElement('div'); row.className = 'fusion-row'; row.style.borderLeftColor = r.color;
+    row.innerHTML = '<div class="fusion-pet"><span class="fp-emoji">' + base.emoji + '</span>' +
+      '<div class="fp-info"><div class="fp-name" style="color:' + r.color + '">' + getDisplayName(base) + '</div>' +
+      '<div class="fp-meta">' + r.name + ' · +' + fmtMult(currentMult) + ' → <b>+' + fmtMult(nextMult) + '</b></div></div></div>' +
       '<div class="fusion-count">×' + arr.length + '</div>';
-    const btn = document.createElement('button');
-    btn.className = 'fusion-btn';
-    btn.textContent = '🧬 Fundir';
-    btn.onclick = () => fusePets(key);
-    row.appendChild(btn);
-    body.appendChild(row);
+    const btn = document.createElement('button'); btn.className = 'fusion-action-btn'; btn.textContent = '🧬 Fundir';
+    btn.onclick = () => fusePets(key, false); row.appendChild(btn); body.appendChild(row);
   });
 }
 
-/* ============ ESTATÍSTICAS ============ */
+/* ============ STATS ============ */
 function openStats() {
-  const body = document.getElementById('statsBody');
-  body.innerHTML = '';
-  const grid = document.createElement('div');
-  grid.className = 'stats-grid';
+  const body = document.getElementById('statsBody'); body.innerHTML = '';
+  const grid = document.createElement('div'); grid.className = 'stats-grid';
   const blocks = [
     { ico:'👆', label:'Cliques feitos', val: fmt(state.stats.clicksMade) },
     { ico:'💰', label:'Total acumulado', val: fmt(state.totalClicks) },
@@ -1755,346 +1990,560 @@ function openStats() {
     { ico:'📈', label:'Cliques/clique', val: fmtMult(getCPC()) },
   ];
   blocks.forEach(b => {
-    const el = document.createElement('div');
-    el.className = 'stat-block';
-    el.innerHTML = '<div class="stat-ico">' + b.ico + '</div>' +
-      '<div class="stat-label">' + b.label + '</div>' +
-      '<div class="stat-value">' + b.val + '</div>';
+    const el = document.createElement('div'); el.className = 'stat-block';
+    el.innerHTML = '<div class="stat-ico">' + b.ico + '</div><div class="stat-label">' + b.label + '</div><div class="stat-value">' + b.val + '</div>';
     grid.appendChild(el);
   });
   body.appendChild(grid);
-  const title1 = document.createElement('div');
-  title1.className = 'stats-section-title';
-  title1.textContent = '🎨 Pets por raridade';
+  const title1 = document.createElement('div'); title1.className = 'stats-section-title'; title1.textContent = '🎨 Pets por raridade';
   body.appendChild(title1);
   const totalPets = Object.values(state.stats.petsByRarity).reduce((a,b) => a+b, 0) || 1;
-  const barsWrap = document.createElement('div');
-  barsWrap.className = 'rarity-bars';
+  const barsWrap = document.createElement('div'); barsWrap.className = 'rarity-bars';
   RARITY_ORDER.slice().reverse().forEach(k => {
-    const r = RARITIES[k];
-    const count = state.stats.petsByRarity[k] || 0;
-    const pct = (count / totalPets) * 100;
-    const bar = document.createElement('div');
-    bar.className = 'rarity-bar';
-    bar.innerHTML =
-      '<span class="rb-name" style="color:' + r.color + '">' + r.name + '</span>' +
-      '<div class="rb-track"><div class="rb-fill" style="background:' + r.color +
-        ';box-shadow:0 0 8px ' + r.color + '"></div></div>' +
+    const r = RARITIES[k]; const count = state.stats.petsByRarity[k] || 0; const pct = (count / totalPets) * 100;
+    const bar = document.createElement('div'); bar.className = 'rarity-bar';
+    bar.innerHTML = '<span class="rb-name" style="color:' + r.color + '">' + r.name + '</span>' +
+      '<div class="rb-track"><div class="rb-fill" style="background:' + r.color + ';box-shadow:0 0 8px ' + r.color + '"></div></div>' +
       '<span class="rb-count">' + fmt(count) + '</span>';
     barsWrap.appendChild(bar);
-    requestAnimationFrame(() => {
-      bar.querySelector('.rb-fill').style.width = Math.max(pct, count ? 2 : 0) + '%';
-    });
+    requestAnimationFrame(() => { bar.querySelector('.rb-fill').style.width = Math.max(pct, count ? 2 : 0) + '%'; });
   });
   body.appendChild(barsWrap);
-  const title2 = document.createElement('div');
-  title2.className = 'stats-section-title';
-  title2.textContent = '🏆 Melhor pet';
+  const title2 = document.createElement('div'); title2.className = 'stats-section-title'; title2.textContent = '🏆 Melhor pet';
   body.appendChild(title2);
-  let best = null;
-  state.pets.forEach(p => { if (!best || getDisplayMult(p) > getDisplayMult(best)) best = p; });
-  const box = document.createElement('div');
-  box.className = 'best-pet-box';
+  let best = null; state.pets.forEach(p => { if (!best || getDisplayMult(p) > getDisplayMult(best)) best = p; });
+  const box = document.createElement('div'); box.className = 'best-pet-box';
   if (best) {
     const r = RARITIES[best.rarity];
-    box.innerHTML =
-      '<div class="bp-emoji">' + best.emoji + '</div>' +
-      '<div class="bp-info">' +
-        '<div class="bp-title">' + (best.equipped ? '⚔️ Equipado' : '🎒 No inventário') + '</div>' +
-        '<div class="bp-name" style="color:' + r.color + '">' + getDisplayName(best) + '</div>' +
-        '<div class="bp-meta">' + r.name + ' · +' + fmtMult(getDisplayMult(best)) + '/clique</div>' +
-      '</div>';
+    box.innerHTML = '<div class="bp-emoji">' + best.emoji + '</div>' +
+      '<div class="bp-info"><div class="bp-title">' + (best.equipped ? '⚔️ Equipado' : '🎒 No inventário') + '</div>' +
+      '<div class="bp-name" style="color:' + r.color + '">' + getDisplayName(best) + '</div>' +
+      '<div class="bp-meta">' + r.name + ' · +' + fmtMult(getDisplayMult(best)) + '/clique</div></div>';
   } else {
     box.innerHTML = '<div class="bp-info"><div class="bp-title">Ainda sem pets</div><div class="bp-name">Abre um ovo!</div></div>';
   }
   body.appendChild(box);
   document.getElementById('statsModal').classList.add('show');
 }
-function closeStats() { document.getElementById('statsModal').classList.remove('show'); }
+function closeStats() { const m = document.getElementById('statsModal'); if (m) m.classList.remove('show'); }
 
-/* ============ RANKING SUPABASE ============ */
-
+/* ============ NOME ============ */
 function getUserName() {
   let n = localStorage.getItem(PLAYER_NAME_KEY);
-  if (!n) {
-    n = prompt('🏅 Escolhe o teu nome para o ranking:', 'Jogador' + Math.floor(Math.random() * 1000));
-    if (!n || !n.trim()) n = 'Jogador' + Math.floor(Math.random() * 1000);
-    n = n.trim().slice(0, 16);
-    localStorage.setItem(PLAYER_NAME_KEY, n);
-  }
+  if (!n) { n = 'Jogador' + Math.floor(Math.random() * 10000); localStorage.setItem(PLAYER_NAME_KEY, n); }
   return n;
 }
-function getUserScore() {
-  return Math.floor(state.totalClicks + state.rebirths * 1e6 + state.stats.petsOpened * 500);
+function openNameModal(isFirstTime) {
+  const modal = document.getElementById('nameModal'); const input = document.getElementById('nameInput');
+  const cancel = document.getElementById('nameCancel'); const title = document.querySelector('.name-title'); const subtitle = document.querySelector('.name-subtitle');
+  if (!modal || !input) return;
+  input.value = localStorage.getItem(PLAYER_NAME_KEY) || '';
+  if (title) title.textContent = isFirstTime ? 'Bem-vindo!' : 'Alterar nome';
+  if (subtitle) subtitle.textContent = isFirstTime ? 'Escolhe o teu nome' : 'Máximo 16 caracteres';
+  if (cancel) cancel.style.display = isFirstTime ? 'none' : 'block';
+  modal.classList.add('show'); setTimeout(() => input.focus(), 100);
+}
+function closeNameModal() { const m = document.getElementById('nameModal'); if (m) m.classList.remove('show'); }
+function saveName() {
+  const input = document.getElementById('nameInput'); const novo = (input.value || '').trim().slice(0, 16);
+  if (!novo) { toast('❌ Escreve um nome!'); return; }
+  const antigo = localStorage.getItem(PLAYER_NAME_KEY);
+  localStorage.setItem(PLAYER_NAME_KEY, novo); localStorage.setItem(NAME_CONFIRMED_KEY, 'true');
+  closeNameModal(); toast('✅ Nome guardado: ' + novo);
+  if (antigo !== novo) { enviarPontuacao(); submitWeeklyScore(); }
+  const rm = document.getElementById('rankModal'); if (rm && rm.classList.contains('show')) renderRankSupabase();
+  updateGiftsBadge(); subscribeChat();
 }
 
+/* ============ RANKING ============ */
+function getUserScore() { return Math.floor(state.totalClicks + state.rebirths * 1e6 + state.stats.petsOpened * 500); }
 async function enviarPontuacao() {
-  if (!supabaseClient) return;
-  const nome = getUserName();
-  const score = getUserScore();
-
+  if (!supabaseClient) return; if (!localStorage.getItem(NAME_CONFIRMED_KEY)) return;
+  const nome = getUserName(); const score = getUserScore();
   try {
-    const { data: existente, error: errBusca } = await supabaseClient
-      .from('leaderboard')
-      .select('id, score')
-      .eq('player', nome)
-      .maybeSingle();
-
-    if (errBusca) {
-      console.error('Erro ao procurar:', errBusca);
-      return;
-    }
-
-    if (existente) {
-      if (score > existente.score) {
-        const { error } = await supabaseClient
-          .from('leaderboard')
-          .update({
-            score: score,
-            rebirths: state.rebirths,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', existente.id);
-        if (error) console.error('Erro ao atualizar:', error);
-      }
-    } else {
-      const { error } = await supabaseClient
-        .from('leaderboard')
-        .insert({
-          player: nome,
-          score: score,
-          rebirths: state.rebirths
-        });
-      if (error) console.error('Erro ao inserir:', error);
-    }
-  } catch(e) {
-    console.error('Erro ao enviar pontuação:', e);
-  }
+    const { data: existente } = await supabaseClient.from('leaderboard').select('id, score').eq('player', nome).maybeSingle();
+    if (existente) { if (score > existente.score) await supabaseClient.from('leaderboard').update({ score, rebirths: state.rebirths, updated_at: new Date().toISOString() }).eq('id', existente.id); }
+    else await supabaseClient.from('leaderboard').insert({ player: nome, score, rebirths: state.rebirths });
+  } catch(e) {}
 }
-
 async function lerRanking() {
   if (!supabaseClient) return [];
-  const { data, error } = await supabaseClient
-    .from('leaderboard')
-    .select('player, score, rebirths')
-    .order('score', { ascending: false })
-    .limit(50);
-
-  if (error) {
-    console.error('Erro ao ler ranking:', error);
-    return [];
-  }
-  return data || [];
+  const { data, error } = await supabaseClient.from('leaderboard').select('player, score, rebirths').order('score', { ascending: false }).limit(50);
+  if (error) return []; return data || [];
 }
-
+let rankTabAtual = 'total';
 async function openRank() {
   document.getElementById('rankModal').classList.add('show');
+  if (!localStorage.getItem(NAME_CONFIRMED_KEY)) { openNameModal(true); return; }
+  rankTabAtual = 'total'; document.getElementById('rankTabTotal').classList.add('active'); document.getElementById('rankTabWeekly').classList.remove('active');
   await renderRankSupabase();
 }
-function closeRank() { document.getElementById('rankModal').classList.remove('show'); }
-
+function closeRank() { const m = document.getElementById('rankModal'); if (m) m.classList.remove('show'); }
+function switchRankTab(tab) {
+  rankTabAtual = tab; document.getElementById('rankTabTotal').classList.toggle('active', tab === 'total'); document.getElementById('rankTabWeekly').classList.toggle('active', tab === 'weekly');
+  renderRankSupabase();
+}
 async function renderRankSupabase() {
-  const body = document.getElementById('rankBody');
-  body.innerHTML = '<div class="rank-loading">⏳ A carregar ranking...</div>';
-
-  if (!supabaseClient) {
-    body.innerHTML = '<div class="empty-msg-big">⚠️ Erro: Supabase não ligado.<br>Verifica a consola (F12).</div>';
-    return;
-  }
-
-  await enviarPontuacao();
-  const lista = await lerRanking();
-  const userName = getUserName();
-  const userScore = getUserScore();
-
+  if (rankTabAtual === 'weekly') return renderRankSemanal();
+  const body = document.getElementById('rankBody'); body.innerHTML = '<div class="rank-loading">⏳ A carregar...</div>';
+  if (!supabaseClient) { body.innerHTML = '<div class="empty-msg-big">⚠️ Supabase não ligado.</div>'; return; }
+  await enviarPontuacao(); const lista = await lerRanking(); const userName = getUserName(); const userScore = getUserScore();
   body.innerHTML = '';
-
-  if (lista.length === 0) {
-    body.innerHTML = '<div class="empty-msg-big">Ainda não há pontuações no ranking.<br>Sê o primeiro a jogar! 🎮</div>';
-    return;
-  }
-
-  const info = document.createElement('div');
-  info.className = 'rank-info';
+  if (lista.length === 0) { body.innerHTML = '<div class="empty-msg-big">Sem pontuações ainda.</div>'; return; }
+  const info = document.createElement('div'); info.className = 'rank-info';
   const minhaPos = lista.findIndex(p => p.player === userName) + 1;
-  info.innerHTML = '🏅 Estás em <b>#' + (minhaPos || '—') + '</b> de ' + lista.length + ' jogadores. ' +
-    'A tua pontuação: <b>' + fmt(userScore) + '</b>';
+  info.innerHTML = '🏅 Estás em <b>#' + (minhaPos || '—') + '</b> de ' + lista.length + '. Pontuação: <b>' + fmt(userScore) + '</b>';
   body.appendChild(info);
-
-  const list = document.createElement('div');
-  list.className = 'rank-list';
-
+  const list = document.createElement('div'); list.className = 'rank-list';
   lista.forEach((p, idx) => {
-    const pos = idx + 1;
-    const isYou = p.player === userName;
-    const row = document.createElement('div');
-    row.className = 'rank-row' + (isYou ? ' you' : '');
-
-    let posClass = '';
-    let posLabel = '#' + pos;
-    if (pos === 1) { posClass = 'top1'; posLabel = '🥇'; }
-    else if (pos === 2) { posClass = 'top2'; posLabel = '🥈'; }
-    else if (pos === 3) { posClass = 'top3'; posLabel = '🥉'; }
-
-    row.innerHTML =
-      '<div class="rank-pos ' + posClass + '">' + posLabel + '</div>' +
-      '<div>' +
-        '<div class="rank-name">' + escapeHtml(p.player) + (isYou ? '<span class="you-tag">TU</span>' : '') + '</div>' +
-        '<div class="rank-meta">🔄 ' + (p.rebirths || 0) + ' rebirths</div>' +
-      '</div>' +
+    const pos = idx + 1; const isYou = p.player === userName;
+    const row = document.createElement('div'); row.className = 'rank-row' + (isYou ? ' you' : '');
+    let posClass = '', posLabel = '#' + pos;
+    if (pos === 1) { posClass = 'top1'; posLabel = '🥇'; } else if (pos === 2) { posClass = 'top2'; posLabel = '🥈'; } else if (pos === 3) { posClass = 'top3'; posLabel = '🥉'; }
+    row.innerHTML = '<div class="rank-pos ' + posClass + '">' + posLabel + '</div>' +
+      '<div><div class="rank-name">' + escapeHtml(p.player) + (isYou ? '<span class="you-tag">TU</span>' : '') + '</div>' +
+      '<div class="rank-meta">🔄 ' + (p.rebirths || 0) + ' rebirths</div></div>' +
       '<div class="rank-score">' + fmt(p.score || 0) + '<small>pontos</small></div>';
-
+    list.appendChild(row);
+  });
+  body.appendChild(list);
+}
+function getWeekStart() {
+  const d = new Date(); const day = d.getUTCDay(); const diff = (day === 0 ? -6 : 1) - day;
+  d.setUTCDate(d.getUTCDate() + diff); d.setUTCHours(0,0,0,0); return d.toISOString().slice(0,10);
+}
+async function submitWeeklyScore() {
+  if (!supabaseClient) return; if (!localStorage.getItem(NAME_CONFIRMED_KEY)) return;
+  const nome = getUserName(); const score = getUserScore(); const week = getWeekStart();
+  try {
+    const { data: existing } = await supabaseClient.from('weekly_scores').select('id, score').eq('player', nome).eq('week_start', week).maybeSingle();
+    if (existing) { if (score > existing.score) await supabaseClient.from('weekly_scores').update({ score, rebirths: state.rebirths, updated_at: new Date().toISOString() }).eq('id', existing.id); }
+    else await supabaseClient.from('weekly_scores').insert({ player: nome, week_start: week, score, rebirths: state.rebirths });
+  } catch(e) {}
+}
+async function lerRankingSemanal() {
+  if (!supabaseClient) return [];
+  const week = getWeekStart();
+  const { data, error } = await supabaseClient.from('weekly_scores').select('player, score, rebirths').eq('week_start', week).order('score', { ascending: false }).limit(50);
+  if (error) return []; return data || [];
+}
+async function renderRankSemanal() {
+  const body = document.getElementById('rankBody'); body.innerHTML = '<div class="rank-loading">⏳ A carregar...</div>';
+  if (!supabaseClient) { body.innerHTML = '<div class="empty-msg-big">⚠️ Supabase não ligado.</div>'; return; }
+  await submitWeeklyScore(); const lista = await lerRankingSemanal(); const userName = getUserName(); const userScore = getUserScore();
+  body.innerHTML = '';
+  const info = document.createElement('div'); info.className = 'week-info';
+  info.innerHTML = '📅 Reinicia todas as segundas-feiras.<br>Semana atual desde <b style="color:var(--gold)">' + getWeekStart() + '</b>.';
+  body.appendChild(info);
+  if (lista.length === 0) { body.innerHTML += '<div class="empty-msg-big">Sem pontuações esta semana.</div>'; return; }
+  const minhaPos = lista.findIndex(p => p.player === userName) + 1;
+  const infoBox = document.createElement('div'); infoBox.className = 'rank-info';
+  infoBox.innerHTML = '🏅 Estás em <b>#' + (minhaPos || '—') + '</b> de ' + lista.length + '. Pontuação: <b>' + fmt(userScore) + '</b>';
+  body.appendChild(infoBox);
+  const list = document.createElement('div'); list.className = 'rank-list';
+  lista.forEach((p, idx) => {
+    const pos = idx + 1; const isYou = p.player === userName;
+    const row = document.createElement('div'); row.className = 'rank-row' + (isYou ? ' you' : '');
+    let posClass = '', posLabel = '#' + pos;
+    if (pos === 1) { posClass = 'top1'; posLabel = '🥇'; } else if (pos === 2) { posClass = 'top2'; posLabel = '🥈'; } else if (pos === 3) { posClass = 'top3'; posLabel = '🥉'; }
+    row.innerHTML = '<div class="rank-pos ' + posClass + '">' + posLabel + '</div>' +
+      '<div><div class="rank-name">' + escapeHtml(p.player) + (isYou ? '<span class="you-tag">TU</span>' : '') + '</div>' +
+      '<div class="rank-meta">🔄 ' + (p.rebirths || 0) + ' rebirths</div></div>' +
+      '<div class="rank-score">' + fmt(p.score || 0) + '<small>pontos</small></div>';
     list.appendChild(row);
   });
   body.appendChild(list);
 }
 
-/* ============ AUTO-UPDATE (só funciona no .exe) ============ */
+/* ============ CHAT ============ */
+let chatChannel = null;
+function fmtChatTime(iso) { try { const d = new Date(iso); return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0'); } catch(e){ return ''; } }
+function makeChatEl(msg, isYou) {
+  const el = document.createElement('div'); el.className = 'chat-msg' + (isYou ? ' you' : '');
+  el.innerHTML = '<div class="cm-header"><span class="cm-name">' + escapeHtml(msg.player) + '</span><span class="cm-time">' + fmtChatTime(msg.created_at) + '</span></div>' +
+    '<div class="cm-text">' + escapeHtml(msg.message) + '</div>';
+  return el;
+}
+function appendChatMessage(msg) {
+  const list = document.getElementById('chatMessages'); if (!list) return;
+  list.appendChild(makeChatEl(msg, msg.player === getUserName())); list.scrollTop = list.scrollHeight;
+}
+async function loadChatMessages() {
+  if (!supabaseClient) return;
+  const list = document.getElementById('chatMessages'); list.innerHTML = '<div class="rank-loading">⏳ A carregar...</div>';
+  try {
+    const { data, error } = await supabaseClient.from('chat_messages').select('*').order('created_at', { ascending: false }).limit(50);
+    if (error) throw error;
+    list.innerHTML = ''; const arr = (data || []).reverse();
+    if (arr.length === 0) { list.innerHTML = '<div class="empty-msg">Sem mensagens. Sê o primeiro!</div>'; return; }
+    arr.forEach(m => list.appendChild(makeChatEl(m, m.player === getUserName()))); list.scrollTop = list.scrollHeight;
+  } catch(e) { list.innerHTML = '<div class="empty-msg">Erro ao carregar.</div>'; }
+}
+async function sendChatMessage() {
+  if (!supabaseClient) return; if (!localStorage.getItem(NAME_CONFIRMED_KEY)) { openNameModal(true); return; }
+  const input = document.getElementById('chatInput'); const msg = (input.value || '').trim().slice(0, 200);
+  if (!msg) return;
+  const last = parseInt(localStorage.getItem('lastChatTime') || '0'); const now = Date.now();
+  if (now - last < 2000) { toast('⏳ Espera ' + Math.ceil((2000-(now-last))/1000) + 's'); return; }
+  localStorage.setItem('lastChatTime', now.toString()); input.value = '';
+  try {
+    const { error } = await supabaseClient.from('chat_messages').insert({ player: getUserName(), message: msg });
+    if (error) { toast('❌ ' + error.message); input.value = msg; }
+  } catch(e) { toast('❌ Erro'); input.value = msg; }
+}
+function subscribeChat() {
+  if (!supabaseClient || chatChannel) return;
+  try {
+    chatChannel = supabaseClient.channel('chat-global')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, (payload) => {
+        const modal = document.getElementById('chatModal'); if (modal && modal.classList.contains('show')) appendChatMessage(payload.new);
+      }).subscribe();
+  } catch(e) {}
+}
+async function openChat() {
+  document.getElementById('chatModal').classList.add('show');
+  if (!localStorage.getItem(NAME_CONFIRMED_KEY)) { openNameModal(true); return; }
+  await loadChatMessages(); subscribeChat();
+}
+function closeChat() { const m = document.getElementById('chatModal'); if (m) m.classList.remove('show'); }
+
+/* ============ PRESENTES ============ */
+let currentGiftPetUid = null;
+async function updateGiftsBadge() {
+  if (!supabaseClient) return; if (!localStorage.getItem(NAME_CONFIRMED_KEY)) return;
+  try {
+    const { data } = await supabaseClient.from('pet_gifts').select('id').eq('to_player', getUserName()).eq('status', 'pending');
+    const badge = document.getElementById('giftsBadge'); const count = (data || []).length;
+    if (badge) { if (count > 0) { badge.textContent = count; badge.style.display = 'inline-flex'; } else badge.style.display = 'none'; }
+  } catch(e) {}
+}
+async function openGifts() {
+  document.getElementById('giftsModal').classList.add('show');
+  if (!localStorage.getItem(NAME_CONFIRMED_KEY)) { openNameModal(true); return; }
+  await renderGifts();
+}
+function closeGifts() { const m = document.getElementById('giftsModal'); if (m) m.classList.remove('show'); }
+async function renderGifts() {
+  const body = document.getElementById('giftsBody'); body.innerHTML = '<div class="rank-loading">⏳ A carregar...</div>';
+  try {
+    const { data, error } = await supabaseClient.from('pet_gifts').select('*').eq('to_player', getUserName()).eq('status', 'pending').order('created_at', { ascending: false });
+    if (error) throw error;
+    body.innerHTML = '';
+    if (!data || data.length === 0) { body.innerHTML = '<div class="empty-msg-big">Sem presentes.</div>'; return; }
+    data.forEach(g => {
+      const r = RARITIES[g.pet_rarity] || RARITIES.comum;
+      const item = document.createElement('div'); item.className = 'gift-item'; item.style.borderLeftColor = r.color;
+      const stars = g.fusion_level ? ' ' + '⭐'.repeat(g.fusion_level) : '';
+      item.innerHTML = '<div class="gift-pet-emoji">' + g.pet_emoji + '</div>' +
+        '<div class="gift-info"><div class="gift-from">De: ' + escapeHtml(g.from_player) + '</div>' +
+        '<div class="gift-pet-name" style="color:' + r.color + '">' + escapeHtml(g.pet_name) + stars + '</div>' +
+        '<div class="gift-rarity" style="color:' + r.color + '">' + r.name + ' · +' + fmtMult(g.pet_mult * Math.pow(FUSION_FACTOR, g.fusion_level || 0)) + '/clique</div></div>' +
+        '<div class="gift-actions"><button class="gift-action-btn gift-accept" data-action="accept" data-id="' + g.id + '">✅</button>' +
+        '<button class="gift-action-btn gift-reject" data-action="reject" data-id="' + g.id + '">✕</button></div>';
+      body.appendChild(item);
+    });
+    body.querySelectorAll('button[data-action]').forEach(btn => {
+      btn.onclick = () => {
+        const id = parseInt(btn.getAttribute('data-id')); const gift = data.find(g => g.id === id);
+        if (!gift) return;
+        if (btn.getAttribute('data-action') === 'accept') acceptGift(gift); else rejectGift(gift);
+      };
+    });
+  } catch(e) { body.innerHTML = '<div class="empty-msg-big">Erro.</div>'; }
+}
+async function acceptGift(gift) {
+  try {
+    const { error } = await supabaseClient.from('pet_gifts').update({ status: 'accepted' }).eq('id', gift.id);
+    if (error) { toast('❌ ' + error.message); return; }
+    state.pets.push({ uid: ++state.petUid, name: gift.pet_name, emoji: gift.pet_emoji, mult: gift.pet_mult, rarity: gift.pet_rarity, equipped: false, fusionLevel: gift.fusion_level || 0 });
+    updateUI(); save(); toast('🎁 Recebeste ' + gift.pet_emoji + ' ' + gift.pet_name + '!');
+    await renderGifts(); await updateGiftsBadge();
+  } catch(e) {}
+}
+async function rejectGift(gift) {
+  try {
+    await supabaseClient.from('pet_gifts').update({ status: 'rejected' }).eq('id', gift.id);
+    toast('❌ Recusado'); await renderGifts(); await updateGiftsBadge();
+  } catch(e) {}
+}
+function openSendGift(uid) {
+  if (!localStorage.getItem(NAME_CONFIRMED_KEY)) { openNameModal(true); return; }
+  const pet = state.pets.find(p => p.uid === uid); if (!pet) return;
+  if (pet.equipped) { toast('⚠️ Desequipa o pet primeiro!'); return; }
+  currentGiftPetUid = uid;
+  const preview = document.getElementById('sendGiftPetPreview'); const r = RARITIES[pet.rarity]; const stars = pet.fusionLevel ? ' ' + '⭐'.repeat(pet.fusionLevel) : '';
+  preview.innerHTML = '<div class="sgp-emoji">' + pet.emoji + '</div>' +
+    '<div class="sgp-info"><div class="sgp-name" style="color:' + r.color + '">' + escapeHtml(pet.name) + stars + '</div>' +
+    '<div class="sgp-meta">' + r.name + ' · +' + fmtMult(getDisplayMult(pet)) + '/clique</div></div>';
+  document.getElementById('sendGiftTo').value = ''; document.getElementById('sendGiftModal').classList.add('show');
+  setTimeout(() => document.getElementById('sendGiftTo').focus(), 100);
+}
+function closeSendGift() { const m = document.getElementById('sendGiftModal'); if (m) m.classList.remove('show'); currentGiftPetUid = null; }
+async function confirmSendGift() {
+  if (currentGiftPetUid === null) return;
+  const pet = state.pets.find(p => p.uid === currentGiftPetUid); if (!pet) { closeSendGift(); return; }
+  const to = (document.getElementById('sendGiftTo').value || '').trim().slice(0, 16);
+  if (!to) { toast('❌ Escreve o nome'); return; }
+  if (to === getUserName()) { toast('❌ Não podes dar a ti mesmo!'); return; }
+  try {
+    const { error } = await supabaseClient.from('pet_gifts').insert({ from_player: getUserName(), to_player: to, pet_name: pet.name, pet_emoji: pet.emoji, pet_mult: pet.mult, pet_rarity: pet.rarity, fusion_level: pet.fusionLevel || 0, status: 'pending' });
+    if (error) { toast('❌ ' + error.message); return; }
+    state.pets = state.pets.filter(p => p.uid !== currentGiftPetUid); updateUI(); save(); closeSendGift(); toast('🎁 Enviado para ' + to + '!');
+  } catch(e) { toast('❌ Erro'); }
+}
+
+/* ============ AUTO-UPDATE ============ */
 function setupAutoUpdater() {
-  if (!window.updater) {
-    console.log('ℹ️ Modo browser: auto-update desativado (só funciona no .exe)');
-    return;
-  }
-
+  if (!window.updater) { console.log('ℹ️ Auto-update off (browser)'); return; }
   console.log('🔄 Auto-update: ativo');
-
-  // Mostra a versão atual na consola
-  window.updater.getVersion().then(v => {
-    console.log('📦 Versão atual:', v);
-  });
-
-  // ===== Nova versão disponível =====
+  window.updater.getVersion().then(v => console.log('📦 Versão:', v)).catch(()=>{});
   window.updater.onAvailable((info) => {
-    console.log('🎉 Nova versão disponível:', info.version);
-    document.getElementById('updateVersion').textContent = 'v' + info.version;
-    document.getElementById('updateNotes').textContent =
-      (info.releaseNotes || 'Sem notas de lançamento.').replace(/<[^>]*>/g, '').trim();
-
-    // Reset estado
-    document.getElementById('updateProgressWrap').style.display = 'none';
-    document.getElementById('updateReady').style.display = 'none';
-    document.getElementById('updateActions').style.display = 'flex';
-    document.getElementById('updateFill').style.width = '0%';
-    document.getElementById('updatePercent').textContent = '0%';
-
-    // Mostra o modal + badge no header
-    document.getElementById('updateModal').classList.add('show');
-    document.getElementById('updateBadge').classList.add('show');
+    const v = document.getElementById('updateVersion'); const n = document.getElementById('updateNotes');
+    if (v) v.textContent = 'v' + info.version;
+    if (n) n.textContent = (info.releaseNotes || 'Sem notas.').replace(/<[^>]*>/g, '').trim();
+    const pw = document.getElementById('updateProgressWrap'); const rw = document.getElementById('updateReady'); const aw = document.getElementById('updateActions'); const f = document.getElementById('updateFill'); const p = document.getElementById('updatePercent');
+    if (pw) pw.style.display = 'none'; if (rw) rw.style.display = 'none'; if (aw) aw.style.display = 'flex'; if (f) f.style.width = '0%'; if (p) p.textContent = '0%';
+    const m = document.getElementById('updateModal'); if (m) m.classList.add('show');
+    const b = document.getElementById('updateBadge'); if (b) b.classList.add('show');
   });
-
-  // ===== Progresso do download =====
   window.updater.onProgress((p) => {
-    document.getElementById('updateProgressWrap').style.display = 'block';
-    document.getElementById('updateFill').style.width = p.percent + '%';
-    document.getElementById('updatePercent').textContent = p.percent + '%';
-    document.getElementById('updateActions').style.display = 'none';
+    const pw = document.getElementById('updateProgressWrap'); const f = document.getElementById('updateFill'); const pc = document.getElementById('updatePercent'); const aw = document.getElementById('updateActions');
+    if (pw) pw.style.display = 'block'; if (f) f.style.width = p.percent + '%'; if (pc) pc.textContent = p.percent + '%'; if (aw) aw.style.display = 'none';
   });
-
-  // ===== Download concluído =====
   window.updater.onDownloaded((version) => {
-    document.getElementById('updateReady').style.display = 'block';
-    document.getElementById('updatePercent').textContent = '✅ v' + version + ' pronta!';
-    document.getElementById('updateActions').style.display = 'none';
-    toast('✅ Atualização descarregada! Clica em reiniciar.');
+    const rw = document.getElementById('updateReady'); const pc = document.getElementById('updatePercent'); const aw = document.getElementById('updateActions');
+    if (rw) rw.style.display = 'block'; if (pc) pc.textContent = '✅ v' + version + ' pronta!'; if (aw) aw.style.display = 'none';
+    toast('✅ Atualização descarregada!');
   });
-
-  // ===== Erro =====
   window.updater.onError((msg) => {
-    toast('❌ Erro na atualização: ' + msg);
-    console.error('Erro do auto-updater:', msg);
-    document.getElementById('updateProgressWrap').style.display = 'none';
-    document.getElementById('updateActions').style.display = 'flex';
+    toast('❌ Erro: ' + msg); const pw = document.getElementById('updateProgressWrap'); const aw = document.getElementById('updateActions');
+    if (pw) pw.style.display = 'none'; if (aw) aw.style.display = 'flex';
   });
-
-  // ===== Sem atualizações =====
-  window.updater.onNone(() => {
-    console.log('✅ App atualizada.');
-  });
-
-  // ===== Botões =====
-  document.getElementById('updateNow').addEventListener('click', () => {
-    console.log('⬇️ A descarregar atualização...');
-    document.getElementById('updateProgressWrap').style.display = 'block';
-    document.getElementById('updatePercent').textContent = '0%';
-    document.getElementById('updateActions').style.display = 'none';
+  window.updater.onNone(() => console.log('✅ Atualizada.'));
+  const un = document.getElementById('updateNow');
+  if (un) un.addEventListener('click', () => {
+    const pw = document.getElementById('updateProgressWrap'); const pc = document.getElementById('updatePercent'); const aw = document.getElementById('updateActions');
+    if (pw) pw.style.display = 'block'; if (pc) pc.textContent = '0%'; if (aw) aw.style.display = 'none';
     window.updater.download();
   });
+  const ul = document.getElementById('updateLater');
+  if (ul) ul.addEventListener('click', () => { const m = document.getElementById('updateModal'); if (m) m.classList.remove('show'); });
+  const ur = document.getElementById('updateRestart');
+  if (ur) ur.addEventListener('click', () => window.updater.install());
+  const ub = document.getElementById('updateBadge');
+  if (ub) ub.addEventListener('click', () => { const m = document.getElementById('updateModal'); if (m) m.classList.add('show'); });
+}
 
-  document.getElementById('updateLater').addEventListener('click', () => {
-    document.getElementById('updateModal').classList.remove('show');
-    // O badge fica visível no header — pode clicar quando quiser
+/* ============ TUTORIAL ============ */
+const TUTORIAL_STEPS = [
+  { icon:'👋', title:'Bem-vindo ao Clicker Simulator!',
+    text:'Este é um jogo onde clicas para ganhar <b>cliques</b>, abres <b>ovos</b> para conseguir <b>pets</b>, e fazes <b>rebirths</b> para ficar mais forte. Vamos aprender o básico!' },
+  { icon:'👆', title:'Clica para ganhar',
+    text:'Clica no <span class="highlight">botão azul grande</span> no centro para ganhar cliques. Cada clique vale o teu multiplicador atual (<b id="tutorialCpc">1×</b>).',
+    highlight:'clickBtn' },
+  { icon:'🥚', title:'Abre o teu primeiro ovo',
+    text:'Vai à <span class="highlight">Loja de Ovos</span> e clica no <b>Ovo Básico</b> (custa 100 cliques). Cada ovo dá-te um pet aleatório!',
+    highlight:'eggList' },
+  { icon:'🐾', title:'Equipa os teus pets',
+    text:'Os pets dão-te <b>multiplicadores</b>. Vai ao <span class="highlight">Inventário</span> à direita e clica num pet para o equipar. Podes ter até <b>4 equipados</b>!',
+    highlight:'inventoryList' },
+  { icon:'🔄', title:'Faz Rebirth',
+    text:'Quando chegares a <b>50K cliques</b>, clica em <span class="highlight">Rebirth</span> no topo. Perdes os cliques mas ganhas <b>+0.5× permanente</b> e desbloqueias novos mundos!',
+    highlight:'rebirthBtn' },
+  { icon:'🎉', title:'Estás pronto!',
+    text:'Explora o jogo à vontade: há <b>4 mundos</b>, <b>150+ pets</b>, <b>fusões</b>, <b>chat</b>, <b>presentes</b> e <b>rankings</b>. Bom jogo! 🐾' },
+];
+let tutorialStep = 0;
+function startTutorial() {
+  tutorialStep = 0;
+  document.getElementById('tutorialOverlay').classList.add('show');
+  renderTutorialStep();
+}
+function renderTutorialStep() {
+  const step = TUTORIAL_STEPS[tutorialStep];
+  document.getElementById('tutorialIcon').textContent = step.icon;
+  document.getElementById('tutorialTitle').textContent = step.title;
+  const textEl = document.getElementById('tutorialText'); textEl.innerHTML = step.text;
+  if (step.highlight === 'clickBtn') {
+    const cpcEl = document.getElementById('tutorialCpc');
+    if (cpcEl) cpcEl.textContent = fmtMult(getCPC()) + '×';
+  }
+  const prog = document.getElementById('tutorialProgress'); prog.innerHTML = '';
+  TUTORIAL_STEPS.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'tutorial-dot' + (i === tutorialStep ? ' active' : '') + (i < tutorialStep ? ' done' : '');
+    prog.appendChild(dot);
   });
+  const nextBtn = document.getElementById('tutorialNext');
+  nextBtn.textContent = tutorialStep === TUTORIAL_STEPS.length - 1 ? '🎮 Jogar!' : 'Continuar →';
+  document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
+  if (step.highlight) {
+    const el = document.getElementById(step.highlight);
+    if (el) el.classList.add('tutorial-highlight');
+  }
+}
+function nextTutorialStep() {
+  if (tutorialStep < TUTORIAL_STEPS.length - 1) { tutorialStep++; renderTutorialStep(); }
+  else endTutorial();
+}
+function endTutorial() {
+  localStorage.setItem(TUTORIAL_KEY, 'true');
+  document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
+  document.getElementById('tutorialOverlay').classList.remove('show');
+  toast('🎉 Tutorial concluído! Bom jogo!');
+  // Se ainda não tem nome, abre o modal
+  if (!localStorage.getItem(NAME_CONFIRMED_KEY)) {
+    setTimeout(() => openNameModal(true), 400);
+  }
+}
 
-  document.getElementById('updateRestart').addEventListener('click', () => {
-    console.log('🔄 A reiniciar para instalar...');
-    window.updater.install();
-  });
+/* ============ GANHOS OFFLINE ============ */
+function checkOfflineEarnings() {
+  const lastSeen = localStorage.getItem(LAST_SEEN_KEY);
+  if (!lastSeen) return;
 
-  // Badge no header reabre o modal
-  document.getElementById('updateBadge').addEventListener('click', () => {
-    document.getElementById('updateModal').classList.add('show');
-  });
+  const elapsed = Date.now() - parseInt(lastSeen);
+  const MIN_MS = 5 * 60 * 1000;
+  if (elapsed < MIN_MS) return;
+
+  const MAX_MS = 8 * 60 * 60 * 1000;
+  const effectiveMs = Math.min(elapsed, MAX_MS);
+
+  const cpc = getCPC();
+  const secondsAway = Math.floor(effectiveMs / 1000);
+  const earnings = Math.floor(cpc * secondsAway * 0.1);
+
+  if (earnings < 1) return;
+
+  const timeStr = fmtTime(elapsed);
+  document.getElementById('offlineTime').textContent = 'Estiveste fora ' + timeStr;
+  document.getElementById('offlineReward').textContent = '+' + fmt(earnings) + ' cliques';
+
+  const claimBtn = document.getElementById('offlineClaim');
+  claimBtn.onclick = () => {
+    state.clicks += earnings;
+    state.totalClicks += earnings;
+    updateUI(); save();
+    document.getElementById('offlineModal').classList.remove('show');
+    toast('🎁 Recebeste ' + fmt(earnings) + ' cliques offline!');
+    if (musica && musica.paused) musica.play().catch(() => {});
+  };
+
+  if (musica && musica.paused) musica.play().catch(() => {});
+
+  document.getElementById('offlineModal').classList.add('show');
 }
 
 /* ============ EVENTOS ============ */
-
 document.getElementById('clickBtn').addEventListener('click', doClick);
 document.getElementById('rebirthBtn').addEventListener('click', doRebirth);
 document.getElementById('revealClose').addEventListener('click', closeReveal);
-document.getElementById('revealModal').addEventListener('click', e => {
-  if (e.target.id === 'revealModal') closeReveal();
-});
+document.getElementById('revealModal').addEventListener('click', e => { if (e.target.id === 'revealModal') closeReveal(); });
+document.getElementById('multiRevealClose').addEventListener('click', closeMultiReveal);
+document.getElementById('multiRevealModal').addEventListener('click', e => { if (e.target.id === 'multiRevealModal') closeMultiReveal(); });
 document.getElementById('collectionBtn').addEventListener('click', openCollection);
 document.getElementById('collectionClose').addEventListener('click', closeCollection);
-document.getElementById('collectionModal').addEventListener('click', e => {
-  if (e.target.id === 'collectionModal') closeCollection();
-});
+document.getElementById('collectionModal').addEventListener('click', e => { if (e.target.id === 'collectionModal') closeCollection(); });
 document.getElementById('fusionBtn').addEventListener('click', openFusion);
 document.getElementById('fusionClose').addEventListener('click', closeFusion);
-document.getElementById('fusionModal').addEventListener('click', e => {
-  if (e.target.id === 'fusionModal') closeFusion();
-});
+document.getElementById('fusionModal').addEventListener('click', e => { if (e.target.id === 'fusionModal') closeFusion(); });
 document.getElementById('statsBtn').addEventListener('click', openStats);
 document.getElementById('statsClose').addEventListener('click', closeStats);
-document.getElementById('statsModal').addEventListener('click', e => {
-  if (e.target.id === 'statsModal') closeStats();
-});
+document.getElementById('statsModal').addEventListener('click', e => { if (e.target.id === 'statsModal') closeStats(); });
 document.getElementById('rankBtn').addEventListener('click', openRank);
 document.getElementById('rankClose').addEventListener('click', closeRank);
 document.getElementById('rankRefresh').addEventListener('click', e => {
-  e.currentTarget.classList.add('spin');
-  setTimeout(() => e.currentTarget.classList.remove('spin'), 600);
+  e.currentTarget.classList.add('spin'); setTimeout(() => e.currentTarget.classList.remove('spin'), 600);
   renderRankSupabase();
 });
-document.getElementById('rankNameBtn').addEventListener('click', () => {
-  const atual = getUserName();
-  const novo = prompt('Novo nome (máx 16 caracteres):', atual);
-  if (novo && novo.trim()) {
-    localStorage.setItem(PLAYER_NAME_KEY, novo.trim().slice(0, 16));
-    toast('✅ Nome alterado para: ' + novo.trim().slice(0, 16));
-    renderRankSupabase();
-  }
-});
-document.getElementById('rankModal').addEventListener('click', e => {
-  if (e.target.id === 'rankModal') closeRank();
-});
+document.getElementById('rankNameBtn').addEventListener('click', () => openNameModal(false));
+document.getElementById('rankModal').addEventListener('click', e => { if (e.target.id === 'rankModal') closeRank(); });
+document.getElementById('rankTabTotal').addEventListener('click', () => switchRankTab('total'));
+document.getElementById('rankTabWeekly').addEventListener('click', () => switchRankTab('weekly'));
 document.getElementById('sellDupesBtn').addEventListener('click', sellAllDuplicates);
+document.getElementById('nameConfirm').addEventListener('click', saveName);
+document.getElementById('nameCancel').addEventListener('click', closeNameModal);
+document.getElementById('nameInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') saveName();
+  if (e.key === 'Escape') closeNameModal();
+});
+document.getElementById('nameModal').addEventListener('click', e => {
+  if (e.target.id === 'nameModal' && localStorage.getItem(NAME_CONFIRMED_KEY)) closeNameModal();
+});
+document.getElementById('chatBtn').addEventListener('click', openChat);
+document.getElementById('chatClose').addEventListener('click', closeChat);
+document.getElementById('chatSend').addEventListener('click', sendChatMessage);
+document.getElementById('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendChatMessage(); });
+document.getElementById('chatModal').addEventListener('click', e => { if (e.target.id === 'chatModal') closeChat(); });
+document.getElementById('giftsBtn').addEventListener('click', openGifts);
+document.getElementById('giftsClose').addEventListener('click', closeGifts);
+document.getElementById('giftsModal').addEventListener('click', e => { if (e.target.id === 'giftsModal') closeGifts(); });
+document.getElementById('sendGiftCancel').addEventListener('click', closeSendGift);
+document.getElementById('sendGiftConfirm').addEventListener('click', confirmSendGift);
+document.getElementById('sendGiftClose').addEventListener('click', closeSendGift);
+document.getElementById('sendGiftTo').addEventListener('keydown', e => { if (e.key === 'Enter') confirmSendGift(); });
+document.getElementById('sendGiftModal').addEventListener('click', e => { if (e.target.id === 'sendGiftModal') closeSendGift(); });
+
+document.getElementById('autoEquipBtn').addEventListener('click', toggleAutoEquip);
+document.getElementById('autoFusionBtn').addEventListener('click', toggleAutoFusion);
+document.getElementById('eggMult1').addEventListener('click', () => setEggMultiplier(1));
+document.getElementById('eggMult2').addEventListener('click', () => setEggMultiplier(2));
+document.getElementById('eggMult3').addEventListener('click', () => setEggMultiplier(3));
+document.getElementById('autoOpenBtn').addEventListener('click', toggleAutoOpen);
+document.getElementById('autoCounterStop').addEventListener('click', () => { stopAutoOpen(); toast('⏹️ Auto parado'); });
+
+document.getElementById('tutorialNext').addEventListener('click', nextTutorialStep);
+document.getElementById('tutorialSkip').addEventListener('click', endTutorial);
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    closeCollection(); closeReveal(); closeFusion(); closeStats(); closeRank();
+    closeCollection(); closeReveal(); closeMultiReveal(); closeFusion(); closeStats(); closeRank();
+    closeChat(); closeGifts(); closeSendGift();
   }
 });
 
 setInterval(() => { state.stats.playTimeMs += 1000; }, 1000);
 setInterval(save, 5000);
 setInterval(enviarPontuacao, 60000);
+setInterval(submitWeeklyScore, 60000);
+setInterval(updateGiftsBadge, 45000);
 
 /* ============ ARRANQUE ============ */
 load();
 updateUI();
+initAudio();
 setupAutoUpdater();
-setTimeout(enviarPontuacao, 2000);
+
+if (state.automation.autoEquip) document.getElementById('autoEquipBtn').classList.add('active');
+if (state.automation.autoFusion) {
+  document.getElementById('autoFusionBtn').classList.add('active');
+  autoFusionInterval = setInterval(runAutoFusion, 700);
+}
+[1,2,3].forEach(i => document.getElementById('eggMult' + i).classList.toggle('active', i === state.automation.eggMultiplier));
+
+// Tutorial (primeira vez)
+if (!localStorage.getItem(TUTORIAL_KEY)) {
+  setTimeout(() => startTutorial(), 600);
+}
+
+// Nome (depois do tutorial)
+if (!localStorage.getItem(NAME_CONFIRMED_KEY) && localStorage.getItem(TUTORIAL_KEY)) {
+  setTimeout(() => openNameModal(true), 800);
+}
+
+// Ganhos offline
+setTimeout(() => {
+  if (localStorage.getItem(NAME_CONFIRMED_KEY) || localStorage.getItem(TUTORIAL_KEY)) {
+    checkOfflineEarnings();
+  }
+}, 1500);
+
+// Enviar pontuação
+setTimeout(() => {
+  if (localStorage.getItem(NAME_CONFIRMED_KEY)) {
+    enviarPontuacao(); submitWeeklyScore(); updateGiftsBadge(); subscribeChat();
+  }
+}, 4000);
 </script>
 </body>
 </html>

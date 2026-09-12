@@ -1,44 +1,38 @@
 {
   "name": "clicker-simulator",
-  "version": "1.0.0",
-  "description": "🐾 Clicker Simulator",
+  "version": "1.1.0",
+  "description": "Clicker Simulator",
   "main": "main.js",
   "author": "BielzinYT",
   "license": "MIT",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder --win",
-    "release": "electron-builder --win --publish always"
+    "build": "electron-builder --win"
   },
   "devDependencies": {
-    "electron": "44.3.0",
-    "electron-builder": "^26.15.3"
+    "electron": "^31.0.0",
+    "electron-builder": "^26.0.0"
   },
   "dependencies": {
-    "electron-log": "^5.1.0",
-    "electron-updater": "^6.3.0"
+    "electron-updater": "^6.3.0",
+    "electron-log": "^5.1.0"
   },
   "build": {
     "appId": "com.bielzinyt.clickersimulator",
     "productName": "Clicker Simulator",
-    "directories": {
-      "output": "dist"
-    },
+    "directories": { "output": "dist" },
     "files": [
       "main.js",
       "preload.js",
       "index.html",
-      "package.json"
+      "package.json",
+      "supabase.js",
+      "musica.mp3",
+      "som_clique.mp3",
+      "som_ovo.mp3"
     ],
     "win": {
-      "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        }
-      ],
+      "target": [{ "target": "nsis", "arch": ["x64"] }],
       "icon": "icon.ico"
     },
     "nsis": {
@@ -49,12 +43,7 @@
       "shortcutName": "Clicker Simulator"
     },
     "publish": [
-      {
-        "provider": "github",
-        "owner": "BielzinYT",
-        "repo": "clicker-simulator",
-        "releaseType": "draft"
-      }
+      { "provider": "github", "owner": "BielzinYT", "repo": "clicker-simulator" }
     ]
   }
 }
