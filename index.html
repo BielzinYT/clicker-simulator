@@ -17,7 +17,13 @@
     background:radial-gradient(ellipse at top,#1a2340 0%,#0a0f1e 70%);
     color:var(--text); min-height:100vh; overflow-x:hidden;
     user-select:none; -webkit-tap-highlight-color:transparent;
+    transition: background .4s ease;
   }
+  body[data-theme="roxo"] { background:radial-gradient(ellipse at top,#2e1a4a 0%,#0a0f1e 70%); --accent:#a855f7; }
+  body[data-theme="verde"] { background:radial-gradient(ellipse at top,#1a4030 0%,#0a0f1e 70%); --accent:#22c55e; }
+  body[data-theme="dourado"] { background:radial-gradient(ellipse at top,#4a3a1a 0%,#0a0f1e 70%); --accent:#fbbf24; }
+  body[data-theme="vermelho"] { background:radial-gradient(ellipse at top,#4a1a1a 0%,#0a0f1e 70%); --accent:#ef4444; }
+
   header {
     display:flex; align-items:center; gap:8px; padding:10px 20px;
     background:rgba(13,18,35,.85); backdrop-filter:blur(10px);
@@ -106,11 +112,15 @@
     animation:floatUp .9s ease-out forwards; z-index:10;
     transform:translateX(-50%);
   }
+  .float-text.crit {
+    font-size:32px; color:#ef4444;
+    text-shadow:0 0 20px #ef4444, 0 0 40px #ef4444, 0 2px 6px rgba(0,0,0,.8);
+  }
   @keyframes floatUp {
     0% { opacity:1; transform:translate(-50%,0) scale(1); }
     100% { opacity:0; transform:translate(-50%,-80px) scale(1.4); }
   }
-  .eggs-controls { display:flex; gap:4px; align-items:center; }
+  .eggs-controls { display:flex; gap:4px; align-items:center; flex-wrap:wrap; }
   .egg-mult-btn {
     background:var(--bg-2); border:1px solid var(--border); color:var(--text-dim);
     padding:4px 10px; border-radius:6px; font-family:inherit;
@@ -190,101 +200,315 @@
     box-shadow:0 0 0 3px rgba(34,197,94,.3), 0 0 20px rgba(34,197,94,.6);
     animation:pulseBadge 1.5s ease-in-out infinite;
   }
-  .egg-emoji { font-size:46px; display:block; margin-bottom:6px;
-    filter:drop-shadow(0 4px 8px rgba(0,0,0,.5)); }
+  .egg-card .egg-emoji {
+    display:inline-block;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,.5));
+    transition: transform .2s;
+    font-size:46px; margin-bottom:6px;
+  }
+  .egg-card:hover .egg-emoji { transform: scale(1.1); }
   .egg-name { font-weight:700; font-size:14px; margin-bottom:4px; }
   .egg-cost { font-size:13px; color:var(--gold); font-weight:700; }
+  .egg-discount {
+    font-size:11px; color:#22c55e; font-weight:800;
+    margin-top:2px; text-decoration:line-through;
+    text-decoration-color:#ef4444;
+  }
+  .egg-card[data-world="0"][data-egg="0"] { background:linear-gradient(160deg,#2a3654,#1e2740); }
+  .egg-card[data-world="0"][data-egg="1"] { background:linear-gradient(160deg,#4a3070,#2a2040); }
+  .egg-card[data-world="0"][data-egg="2"] { background:linear-gradient(160deg,#5a4518,#3a2c10); }
+  .egg-card[data-world="1"][data-egg="0"] { background:linear-gradient(160deg,#1e4a25,#0f2a15); }
+  .egg-card[data-world="1"][data-egg="1"] { background:linear-gradient(160deg,#3a3a2a,#1a1a10); }
+  .egg-card[data-world="1"][data-egg="2"] { background:linear-gradient(160deg,#1a4a2a,#0a2a15); }
+  .egg-card[data-world="2"][data-egg="0"] { background:linear-gradient(160deg,#1a3a5a,#0a1a2a); }
+  .egg-card[data-world="2"][data-egg="1"] { background:linear-gradient(160deg,#0a2a4a,#050a1a); }
+  .egg-card[data-world="2"][data-egg="2"] { background:linear-gradient(160deg,#0a4a6a,#05202a); }
+  .egg-card[data-world="3"][data-egg="0"] { background:linear-gradient(160deg,#3a1a5a,#1a0a2a); }
+  .egg-card[data-world="3"][data-egg="1"] { background:linear-gradient(160deg,#1a1a4a,#0a0a1a); }
+  .egg-card[data-world="3"][data-egg="2"] { background:linear-gradient(160deg,#4a3a1a,#2a1a0a); }
+  .egg-card[data-world="4"][data-egg="0"] { background:linear-gradient(160deg,#1a5a6a,#0a2a3a); }
+  .egg-card[data-world="4"][data-egg="1"] { background:linear-gradient(160deg,#2a6a7a,#0a3a4a); }
+  .egg-card[data-world="4"][data-egg="2"] { background:linear-gradient(160deg,#0a0a1a,#000); }
+
   .equipped-grid { display:grid; grid-template-columns:repeat(2,1fr);
     gap:8px; margin-bottom:14px; }
   .equip-slot {
     aspect-ratio:1; border-radius:10px; background:var(--bg-2);
     border:2px dashed var(--border); display:flex; flex-direction:column;
     align-items:center; justify-content:center; font-size:26px;
-    color:var(--text-dim); transition:all .2s;
+    color:var(--text-dim); transition:all .2s; position:relative;
   }
   .equip-slot.filled { border-style:solid; cursor:pointer; background:var(--bg-3); }
   .equip-slot.filled:hover { transform:scale(1.05); filter:brightness(1.2); }
+  .equip-slot.filled[data-rarity="comum"] { box-shadow: inset 0 0 15px rgba(156,163,175,.4), 0 0 8px rgba(156,163,175,.3); }
+  .equip-slot.filled[data-rarity="incomum"] { box-shadow: inset 0 0 15px rgba(74,222,128,.4), 0 0 10px rgba(74,222,128,.5); }
+  .equip-slot.filled[data-rarity="raro"] { box-shadow: inset 0 0 15px rgba(96,165,250,.5), 0 0 14px rgba(96,165,250,.6); }
+  .equip-slot.filled[data-rarity="epico"] { box-shadow: inset 0 0 18px rgba(167,139,250,.5), 0 0 18px rgba(167,139,250,.7); animation:auraPulse 2s ease-in-out infinite; }
+  .equip-slot.filled[data-rarity="lendario"] { box-shadow: inset 0 0 20px rgba(251,191,36,.6), 0 0 22px rgba(251,191,36,.8); animation:auraPulse 1.6s ease-in-out infinite; }
+  .equip-slot.filled[data-rarity="mitico"] { box-shadow: inset 0 0 22px rgba(248,113,113,.7), 0 0 28px rgba(248,113,113,.9), 0 0 40px rgba(248,113,113,.5); animation:auraPulse 1.2s ease-in-out infinite; }
+  @keyframes auraPulse {
+    0%,100% { filter: brightness(1); }
+    50% { filter: brightness(1.25); }
+  }
   .equip-slot .p-name { font-size:9px; font-weight:700; margin-top:2px;
-    text-align:center; line-height:1.1; padding:0 4px; }
+    text-align:center; line-height:1.1; padding:0 4px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
   .equip-slot .p-mult { font-size:10px; color:var(--gold); font-weight:800; }
-  .inv-list {
-    max-height:400px; overflow-y:auto; display:flex;
-    flex-direction:column; gap:6px; padding-right:4px;
+
+  /* ===== BOTÃO DE ABRIR INVENTÁRIO ===== */
+  .open-inv-btn {
+    width: 100%;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all .15s;
+    box-shadow: 0 4px 14px rgba(139,92,246,.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 6px;
   }
-  .inv-list::-webkit-scrollbar { width:6px; }
-  .inv-list::-webkit-scrollbar-track { background:var(--bg-2); border-radius:3px; }
-  .inv-list::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
-  .pet-item {
-    display:flex; align-items:center; gap:8px; padding:8px 10px;
-    border-radius:8px; background:var(--bg-2); cursor:pointer;
-    border-left:4px solid; transition:all .15s; font-size:12px;
+  .open-inv-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139,92,246,.7); }
+  .open-inv-btn .oib-count {
+    background: rgba(0,0,0,.25);
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    min-width: 32px;
   }
-  .pet-item:hover { background:var(--bg-3); transform:translateX(3px); }
-  .pet-item .pi-emoji { font-size:22px; }
-  .pet-item .pi-info { flex:1; min-width:0; }
-  .pet-item .pi-name { font-weight:700; font-size:12px; }
-  .pet-item .pi-rarity { font-size:9px; text-transform:uppercase;
-    letter-spacing:.5px; font-weight:700; }
-  .pet-item .pi-mult { color:var(--gold); font-weight:800; font-size:12px; }
-  .pi-sell {
-    background:linear-gradient(135deg,#fbbf24,#f59e0b);
-    border:none; border-radius:6px; width:26px; height:26px;
-    font-size:13px; cursor:pointer; display:flex;
-    align-items:center; justify-content:center;
-    transition:transform .15s; padding:0; flex-shrink:0;
-    color:#111; box-shadow:0 2px 6px rgba(251,191,36,.4);
+
+  /* ===== MODAL DO INVENTÁRIO ===== */
+  .inv-modal-card {
+    max-width: 900px !important;
+    width: 100%;
   }
-  .pi-sell:hover { transform:scale(1.18); box-shadow:0 3px 10px rgba(251,191,36,.7); }
-  .pi-gift {
-    background:linear-gradient(135deg, #22c55e, #16a34a);
-    border:none; border-radius:6px; width:26px; height:26px;
-    font-size:13px; cursor:pointer; display:flex;
-    align-items:center; justify-content:center;
-    transition:transform .15s; padding:0; flex-shrink:0;
-    color:#fff; box-shadow:0 2px 6px rgba(34,197,94,.4);
+  .inv-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(13,18,35,.5);
+    flex-wrap: wrap;
   }
-  .pi-gift:hover { transform:scale(1.18); }
-  .empty-msg { text-align:center; color:var(--text-dim); font-size:12px;
-    padding:20px 10px; font-style:italic; }
-  .sell-dupes-btn {
-    width:100%; margin-bottom:10px; padding:8px 12px;
-    background:linear-gradient(135deg,#fbbf24,#f59e0b);
-    border:none; border-radius:8px; color:#111;
-    font-weight:800; font-size:12px; cursor:pointer;
-    font-family:inherit; transition:transform .15s;
-    box-shadow:0 3px 10px rgba(251,191,36,.3);
+  .inv-controls .inv-search {
+    flex: 1;
+    min-width: 180px;
+    margin-bottom: 0;
   }
-  .sell-dupes-btn:hover { transform:translateY(-2px); }
+  .inv-count-badge {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--gold);
+    background: rgba(251,191,36,.1);
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(251,191,36,.3);
+    white-space: nowrap;
+  }
+  .inv-filter-bar {
+    display: flex;
+    gap: 6px;
+    padding: 10px 20px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    background: rgba(13,18,35,.3);
+  }
+  .inv-filter-btn {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .inv-filter-btn:hover { color: var(--text); background: var(--bg-3); }
+  .inv-filter-btn.active {
+    background: var(--accent);
+    color: #0a0f1e;
+    border-color: transparent;
+    box-shadow: 0 2px 8px rgba(56,189,248,.4);
+  }
+  .inv-pets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    padding: 16px 20px;
+  }
+  .inv-pet-card {
+    background: var(--bg-2);
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    padding: 12px 10px;
+    text-align: center;
+    position: relative;
+    transition: all .15s;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .inv-pet-card:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.1);
+    box-shadow: 0 8px 20px rgba(0,0,0,.4);
+  }
+  .inv-pet-card.equipped {
+    border-color: var(--gold);
+    background: linear-gradient(160deg, rgba(251,191,36,.1), var(--bg-2));
+    box-shadow: 0 0 12px rgba(251,191,36,.3);
+  }
+  .inv-pet-card.pinned {
+    background: linear-gradient(160deg, rgba(251,191,36,.08), var(--bg-2));
+  }
+  .inv-pet-card .pc-badge {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    background: var(--gold);
+    color: #111;
+    font-size: 10px;
+    font-weight: 900;
+    border-radius: 10px;
+    padding: 2px 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.5);
+    z-index: 2;
+  }
+  .inv-pet-card .pc-pin-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: linear-gradient(135deg,#fbbf24,#f59e0b);
+    color: #111;
+    font-size: 12px;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,.5);
+    z-index: 2;
+  }
+  .inv-pet-card .pc-emoji {
+    font-size: 44px;
+    line-height: 1;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,.5));
+    margin-top: 4px;
+  }
+  .inv-pet-card .pc-name {
+    font-weight: 800;
+    font-size: 12px;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 4px;
+  }
+  .inv-pet-card .pc-rarity {
+    font-size: 9px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+  .inv-pet-card .pc-mult {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--gold);
+  }
+  .inv-pet-card .pc-actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    margin-top: auto;
+  }
+  .inv-pet-card .pc-btn {
+    border: none;
+    border-radius: 6px;
+    height: 28px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s;
+    padding: 0;
+  }
+  .inv-pet-card .pc-btn:hover:not(:disabled) { transform: scale(1.1); }
+  .inv-pet-card .pc-btn:disabled { opacity: .35; cursor: not-allowed; }
+  .inv-pet-card .pc-equip { background: linear-gradient(135deg,#22c55e,#16a34a); color: #fff; }
+  .inv-pet-card .pc-unequip { background: linear-gradient(135deg,#f59e0b,#d97706); color: #fff; }
+  .inv-pet-card .pc-gift { background: linear-gradient(135deg,#a855f7,#8b5cf6); color: #fff; }
+  .inv-pet-card .pc-pin { background: var(--bg-3); color: var(--text-dim); }
+  .inv-pet-card .pc-pin.active { background: linear-gradient(135deg,#fbbf24,#f59e0b); color: #111; }
+  .inv-pet-card .pc-sell { background: linear-gradient(135deg,#fbbf24,#f59e0b); color: #111; }
+  .inv-empty {
+    text-align: center;
+    color: var(--text-dim);
+    padding: 60px 20px;
+    font-style: italic;
+    font-size: 14px;
+    line-height: 1.8;
+    grid-column: 1 / -1;
+  }
+  .inv-pet-card .pc-rarity-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 0 0 10px 10px;
+  }
+
+  .inv-search {
+    width:100%; background:var(--bg-0); border:2px solid var(--border);
+    color:var(--text); padding:8px 12px; border-radius:8px;
+    font-size:12px; font-family:inherit; outline:none;
+    transition:border-color .15s;
+  }
+  .inv-search:focus { border-color:var(--accent); }
+
   .hdr-btn {
     border:none; color:#fff; padding:7px 14px; border-radius:20px;
     font-weight:700; font-size:13px; cursor:pointer;
     transition:all .2s; white-space:nowrap; font-family:inherit;
     display:inline-flex; align-items:center; gap:4px;
+    position:relative;
   }
   .hdr-btn:hover { transform:translateY(-2px); }
-  .rebirth-btn {
-    background:linear-gradient(135deg,#a855f7,#ec4899);
-    box-shadow:0 4px 12px rgba(168,85,247,.4);
-  }
+  .rebirth-btn { background:linear-gradient(135deg,#a855f7,#ec4899); box-shadow:0 4px 12px rgba(168,85,247,.4); }
   .rebirth-btn:hover { box-shadow:0 6px 18px rgba(168,85,247,.6); }
-  .rebirth-btn.not-ready {
-    opacity:.55;
-    background:linear-gradient(135deg,#6b7280,#4b5563);
-    box-shadow:none;
-  }
+  .rebirth-btn.not-ready { opacity:.55; background:linear-gradient(135deg,#6b7280,#4b5563); box-shadow:none; }
   .rebirth-btn.not-ready:hover { transform:none; box-shadow:none; }
-  .collection-btn { background:linear-gradient(135deg,#f59e0b,#fbbf24); color:#111;
-    box-shadow:0 4px 12px rgba(251,191,36,.4); }
-  .fusion-btn { background:linear-gradient(135deg,#8b5cf6,#a78bfa);
-    box-shadow:0 4px 12px rgba(139,92,246,.4); }
-  .stats-btn { background:linear-gradient(135deg,#0ea5e9,#38bdf8); color:#042f4a;
-    box-shadow:0 4px 12px rgba(56,189,248,.4); }
-  .rank-btn { background:linear-gradient(135deg,#16a34a,#22c55e);
-    box-shadow:0 4px 12px rgba(34,197,94,.4); }
-  .chat-btn { background: linear-gradient(135deg, #06b6d4, #0891b2);
-    box-shadow: 0 4px 12px rgba(6,182,212,.4); }
-  .gifts-btn { background: linear-gradient(135deg, #f43f5e, #e11d48);
-    box-shadow: 0 4px 12px rgba(244,63,94,.4); }
+  .collection-btn { background:linear-gradient(135deg,#f59e0b,#fbbf24); color:#111; box-shadow:0 4px 12px rgba(251,191,36,.4); }
+  .fusion-btn { background:linear-gradient(135deg,#8b5cf6,#a78bfa); box-shadow:0 4px 12px rgba(139,92,246,.4); }
+  .stats-btn { background:linear-gradient(135deg,#0ea5e9,#38bdf8); color:#042f4a; box-shadow:0 4px 12px rgba(56,189,248,.4); }
+  .rank-btn { background:linear-gradient(135deg,#16a34a,#22c55e); box-shadow:0 4px 12px rgba(34,197,94,.4); }
+  .chat-btn { background: linear-gradient(135deg, #06b6d4, #0891b2); box-shadow: 0 4px 12px rgba(6,182,212,.4); }
+  .gifts-btn { background: linear-gradient(135deg, #f43f5e, #e11d48); box-shadow: 0 4px 12px rgba(244,63,94,.4); }
+  .friends-btn { background: linear-gradient(135deg, #ec4899, #db2777); box-shadow: 0 4px 12px rgba(236,72,153,.4); }
+  .pm-btn { background: linear-gradient(135deg, #8b5cf6, #6366f1); box-shadow: 0 4px 12px rgba(139,92,246,.4); }
+  .themes-btn { background: linear-gradient(135deg, #f59e0b, #ec4899); box-shadow: 0 4px 12px rgba(245,158,11,.4); }
+  .notif-badge {
+    position:absolute; top:-4px; right:-4px;
+    background:#ef4444; color:#fff; font-size:10px; font-weight:800;
+    border-radius:10px; padding:1px 6px;
+    min-width:16px; text-align:center;
+    animation:pulseBadge 1.5s ease-in-out infinite;
+    box-shadow:0 0 8px rgba(239,68,68,.6);
+  }
   .modal-overlay {
     position:fixed; inset:0; background:rgba(0,0,0,.75);
     backdrop-filter:blur(6px); display:none; align-items:center;
@@ -332,8 +556,6 @@
   }
   .multi-reveal-list { display:flex; flex-direction:column; gap:8px;
     margin-bottom:18px; max-height:340px; overflow-y:auto; padding-right:4px; }
-  .multi-reveal-list::-webkit-scrollbar { width:6px; }
-  .multi-reveal-list::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
   .mr-item {
     display:flex; align-items:center; gap:10px;
     padding:10px 14px; border-radius:10px;
@@ -383,10 +605,7 @@
   }
   @keyframes particleBurst {
     0% { transform:translate(-50%,-50%) scale(1); opacity:1; }
-    100% {
-      transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0);
-      opacity:0;
-    }
+    100% { transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0); opacity:0; }
   }
   .screen-shake { animation:screenShake .35s; }
   @keyframes screenShake {
@@ -396,10 +615,7 @@
     60% { transform:translate(-3px, -3px); }
     80% { transform:translate(3px, 3px); }
   }
-  #fireworks {
-    position:fixed; inset:0; pointer-events:none; z-index:998;
-    display:none; overflow:hidden;
-  }
+  #fireworks { position:fixed; inset:0; pointer-events:none; z-index:998; display:none; overflow:hidden; }
   #fireworks.show { display:block; }
   #fireworks.tint::before {
     content:''; position:absolute; inset:0;
@@ -424,18 +640,9 @@
     background:linear-gradient(90deg,#fbbf24,#f59e0b);
     -webkit-background-clip:text; background-clip:text; color:transparent;
   }
-  .modal-header h2.fusion-title {
-    background:linear-gradient(90deg,#a78bfa,#8b5cf6);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-  }
-  .modal-header h2.stats-title {
-    background:linear-gradient(90deg,#38bdf8,#0ea5e9);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-  }
-  .modal-header h2.rank-title {
-    background:linear-gradient(90deg,#22c55e,#16a34a);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-  }
+  .modal-header h2.fusion-title { background:linear-gradient(90deg,#a78bfa,#8b5cf6); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .modal-header h2.stats-title { background:linear-gradient(90deg,#38bdf8,#0ea5e9); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .modal-header h2.rank-title { background:linear-gradient(90deg,#22c55e,#16a34a); -webkit-background-clip:text; background-clip:text; color:transparent; }
   .close-x {
     background:var(--bg-3); border:1px solid var(--border); color:var(--text);
     width:32px; height:32px; border-radius:8px; cursor:pointer;
@@ -447,9 +654,7 @@
   .modal-body::-webkit-scrollbar { width:8px; }
   .modal-body::-webkit-scrollbar-track { background:var(--bg-1); }
   .modal-body::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
-  .modal-body::-webkit-scrollbar-thumb:hover { background:var(--accent); }
   .world-section { margin-bottom:22px; }
-  .world-section:last-child { margin-bottom:0; }
   .world-section-title {
     font-size:13px; font-weight:800; letter-spacing:1px;
     margin-bottom:10px; padding-bottom:6px;
@@ -461,10 +666,7 @@
     font-weight:600; text-transform:none; letter-spacing:0;
   }
   .world-section-title .ws-count b { color:var(--gold); }
-  .collection-grid {
-    display:grid; grid-template-columns:repeat(auto-fill, minmax(94px, 1fr));
-    gap:8px;
-  }
+  .collection-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(94px, 1fr)); gap:8px; }
   .collect-item {
     background:var(--bg-2); border-radius:10px; padding:8px 6px;
     text-align:center; border:2px solid var(--border);
@@ -473,47 +675,15 @@
     justify-content:center; align-items:center;
   }
   .collect-item.found:hover { transform:scale(1.06); filter:brightness(1.15); z-index:2; }
-  .collect-item .ci-emoji {
-    font-size:30px; display:block; margin-bottom:2px;
-    filter:drop-shadow(0 3px 6px rgba(0,0,0,.5));
-  }
+  .collect-item .ci-emoji { font-size:30px; display:block; margin-bottom:2px; filter:drop-shadow(0 3px 6px rgba(0,0,0,.5)); }
   .collect-item.locked { opacity:.5; background:var(--bg-1); }
-  .collect-item.locked .ci-emoji {
-    filter:brightness(0) invert(.35) drop-shadow(0 0 4px #000);
-  }
-  .collect-item .ci-name {
-    font-size:10px; font-weight:700; line-height:1.1;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    max-width:100%;
-  }
-  .collect-item .ci-rarity {
-    font-size:8px; font-weight:800; text-transform:uppercase;
-    letter-spacing:.3px; margin-top:2px;
-  }
-  .collect-item .ci-count {
-    position:absolute; top:-6px; right:-6px;
-    background:linear-gradient(135deg,#fbbf24,#f59e0b);
-    color:#111; font-size:11px; font-weight:900;
-    border-radius:10px; padding:2px 7px; min-width:22px;
-    box-shadow:0 2px 6px rgba(0,0,0,.5), 0 0 0 2px var(--bg-1);
-    z-index:3;
-  }
-  .fusion-info-box {
-    background:rgba(139,92,246,.08);
-    border:1px solid rgba(139,92,246,.3);
-    border-radius:10px; padding:10px 14px;
-    font-size:12px; color:var(--text-dim);
-    margin-bottom:14px; line-height:1.5;
-  }
+  .collect-item.locked .ci-emoji { filter:brightness(0) invert(.35) drop-shadow(0 0 4px #000); }
+  .collect-item .ci-name { font-size:10px; font-weight:700; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+  .collect-item .ci-rarity { font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:.3px; margin-top:2px; }
+  .collect-item .ci-count { position:absolute; top:-6px; right:-6px; background:linear-gradient(135deg,#fbbf24,#f59e0b); color:#111; font-size:11px; font-weight:900; border-radius:10px; padding:2px 7px; min-width:22px; box-shadow:0 2px 6px rgba(0,0,0,.5), 0 0 0 2px var(--bg-1); z-index:3; }
+  .fusion-info-box { background:rgba(139,92,246,.08); border:1px solid rgba(139,92,246,.3); border-radius:10px; padding:10px 14px; font-size:12px; color:var(--text-dim); margin-bottom:14px; line-height:1.5; }
   .fusion-info-box b { color:#a78bfa; }
-  .fusion-row {
-    display:flex; align-items:center; gap:12px;
-    padding:12px 14px; margin-bottom:8px;
-    background:var(--bg-2); border-radius:12px;
-    border:1px solid var(--border);
-    border-left:5px solid;
-    transition:transform .15s;
-  }
+  .fusion-row { display:flex; align-items:center; gap:12px; padding:12px 14px; margin-bottom:8px; background:var(--bg-2); border-radius:12px; border:1px solid var(--border); border-left:5px solid; transition:transform .15s; }
   .fusion-row:hover { transform:translateX(3px); }
   .fusion-pet { display:flex; align-items:center; gap:10px; flex:1; min-width:0; }
   .fp-emoji { font-size:36px; filter:drop-shadow(0 3px 6px rgba(0,0,0,.5)); }
@@ -521,335 +691,166 @@
   .fp-name { font-weight:800; font-size:14px; }
   .fp-meta { font-size:11px; color:var(--text-dim); font-weight:600; margin-top:2px; }
   .fp-meta b { color:var(--gold); }
-  .fusion-count {
-    font-size:12px; font-weight:800; color:var(--gold);
-    padding:5px 12px; background:rgba(251,191,36,.1);
-    border-radius:20px; border:1px solid rgba(251,191,36,.3);
-    white-space:nowrap;
-  }
-  .fusion-action-btn {
-    background:linear-gradient(135deg,#8b5cf6,#a78bfa);
-    border:none; color:#fff; padding:8px 18px;
-    border-radius:10px; font-weight:800; font-size:13px;
-    cursor:pointer; font-family:inherit; white-space:nowrap;
-    transition:all .15s; box-shadow:0 4px 12px rgba(139,92,246,.4);
-  }
+  .fusion-count { font-size:12px; font-weight:800; color:var(--gold); padding:5px 12px; background:rgba(251,191,36,.1); border-radius:20px; border:1px solid rgba(251,191,36,.3); white-space:nowrap; }
+  .fusion-action-btn { background:linear-gradient(135deg,#8b5cf6,#a78bfa); border:none; color:#fff; padding:8px 18px; border-radius:10px; font-weight:800; font-size:13px; cursor:pointer; font-family:inherit; white-space:nowrap; transition:all .15s; box-shadow:0 4px 12px rgba(139,92,246,.4); }
   .fusion-action-btn:hover { transform:scale(1.05); }
-  .stats-grid {
-    display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
-    gap:10px; margin-bottom:20px;
-  }
-  .stat-block {
-    background:var(--bg-2); border:1px solid var(--border);
-    border-radius:12px; padding:14px; text-align:center;
-    transition:transform .15s, border-color .15s;
-  }
+  .stats-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:10px; margin-bottom:20px; }
+  .stat-block { background:var(--bg-2); border:1px solid var(--border); border-radius:12px; padding:14px; text-align:center; transition:transform .15s, border-color .15s; }
   .stat-block:hover { transform:translateY(-3px); border-color:var(--accent); }
   .stat-ico { font-size:26px; margin-bottom:4px; }
-  .stat-label {
-    font-size:10px; text-transform:uppercase;
-    letter-spacing:1px; color:var(--text-dim);
-    font-weight:700; margin-bottom:4px;
-  }
-  .stat-value {
-    font-size:20px; font-weight:900;
-    background:linear-gradient(90deg,#38bdf8,#a855f7);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-  }
-  .stats-section-title {
-    font-size:12px; text-transform:uppercase;
-    letter-spacing:1.5px; color:var(--text-dim);
-    font-weight:800; margin-bottom:12px;
-    padding-bottom:6px; border-bottom:1px solid var(--border);
-  }
+  .stat-label { font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--text-dim); font-weight:700; margin-bottom:4px; }
+  .stat-value { font-size:20px; font-weight:900; background:linear-gradient(90deg,#38bdf8,#a855f7); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .stats-section-title { font-size:12px; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-dim); font-weight:800; margin-bottom:12px; padding-bottom:6px; border-bottom:1px solid var(--border); }
   .rarity-bars { display:flex; flex-direction:column; gap:8px; margin-bottom:20px; }
-  .rarity-bar {
-    display:grid; grid-template-columns:80px 1fr 60px;
-    align-items:center; gap:10px; font-size:12px; font-weight:700;
-  }
+  .rarity-bar { display:grid; grid-template-columns:80px 1fr 60px; align-items:center; gap:10px; font-size:12px; font-weight:700; }
   .rb-name { text-transform:uppercase; letter-spacing:.5px; font-size:10px; font-weight:800; }
-  .rb-track {
-    height:10px; background:var(--bg-0);
-    border-radius:5px; overflow:hidden; border:1px solid var(--border);
-  }
+  .rb-track { height:10px; background:var(--bg-0); border-radius:5px; overflow:hidden; border:1px solid var(--border); }
   .rb-fill { height:100%; width:0%; transition:width .8s cubic-bezier(.34,1.56,.64,1); border-radius:5px; }
   .rb-count { text-align:right; color:var(--gold); font-weight:800; font-size:12px; }
-  .best-pet-box {
-    background:linear-gradient(135deg, rgba(251,191,36,.1), rgba(251,191,36,.02));
-    border:1px solid rgba(251,191,36,.3);
-    border-radius:12px; padding:14px;
-    display:flex; align-items:center; gap:14px;
-  }
+  .best-pet-box { background:linear-gradient(135deg, rgba(251,191,36,.1), rgba(251,191,36,.02)); border:1px solid rgba(251,191,36,.3); border-radius:12px; padding:14px; display:flex; align-items:center; gap:14px; }
   .best-pet-box .bp-emoji { font-size:44px; filter:drop-shadow(0 3px 8px rgba(0,0,0,.5)); }
   .best-pet-box .bp-info { flex:1; min-width:0; }
-  .best-pet-box .bp-title {
-    font-size:10px; text-transform:uppercase;
-    letter-spacing:1px; color:var(--text-dim);
-    font-weight:800; margin-bottom:4px;
-  }
+  .best-pet-box .bp-title { font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--text-dim); font-weight:800; margin-bottom:4px; }
   .best-pet-box .bp-name { font-size:18px; font-weight:800; }
   .best-pet-box .bp-meta { font-size:12px; color:var(--gold); font-weight:700; margin-top:2px; }
-  .empty-msg-big {
-    text-align:center; color:var(--text-dim);
-    padding:40px 20px; font-style:italic; font-size:13px;
-    line-height:1.6;
-  }
-  .rank-info {
-    background:rgba(34,197,94,.08);
-    border:1px solid rgba(34,197,94,.3);
-    border-radius:10px; padding:10px 14px;
-    font-size:12px; color:var(--text-dim);
-    margin-bottom:14px; line-height:1.5;
-  }
+  .empty-msg-big { text-align:center; color:var(--text-dim); padding:40px 20px; font-style:italic; font-size:13px; line-height:1.6; }
+  .rank-info { background:rgba(34,197,94,.08); border:1px solid rgba(34,197,94,.3); border-radius:10px; padding:10px 14px; font-size:12px; color:var(--text-dim); margin-bottom:14px; line-height:1.5; }
   .rank-info b { color:#22c55e; }
   .rank-list { display:flex; flex-direction:column; gap:6px; }
-  .rank-row {
-    display:grid; grid-template-columns:52px 1fr auto;
-    align-items:center; gap:12px;
-    padding:10px 14px; border-radius:10px;
-    background:var(--bg-2); border:1px solid var(--border);
-    transition:transform .15s, background .15s;
-  }
+  .rank-row { display:grid; grid-template-columns:52px 1fr auto; align-items:center; gap:12px; padding:10px 14px; border-radius:10px; background:var(--bg-2); border:1px solid var(--border); transition:transform .15s, background .15s; }
   .rank-row:hover { background:var(--bg-3); transform:translateX(3px); }
-  .rank-row.you {
-    background:linear-gradient(90deg, rgba(34,197,94,.18), rgba(34,197,94,.05));
-    border-color:#22c55e;
-    box-shadow:0 0 16px rgba(34,197,94,.25);
-  }
-  .rank-row.you:hover { transform:translateX(3px); background:linear-gradient(90deg, rgba(34,197,94,.25), rgba(34,197,94,.1)); }
+  .rank-row.you { background:linear-gradient(90deg, rgba(34,197,94,.18), rgba(34,197,94,.05)); border-color:#22c55e; box-shadow:0 0 16px rgba(34,197,94,.25); }
   .rank-pos { font-size:16px; font-weight:900; text-align:center; width:52px; }
   .rank-pos.top1 { color:#fbbf24; text-shadow:0 0 12px rgba(251,191,36,.6); font-size:20px; }
   .rank-pos.top2 { color:#cbd5e1; text-shadow:0 0 10px rgba(203,213,225,.5); font-size:18px; }
   .rank-pos.top3 { color:#d97706; text-shadow:0 0 10px rgba(217,119,6,.5); font-size:17px; }
-  .rank-name {
-    font-weight:700; font-size:14px;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  }
-  .rank-name .you-tag {
-    font-size:9px; color:#22c55e; font-weight:800;
-    padding:2px 6px; border-radius:5px;
-    background:rgba(34,197,94,.15);
-    margin-left:6px; letter-spacing:.5px;
-    text-transform:uppercase;
-  }
+  .rank-name { font-weight:700; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .rank-name .you-tag { font-size:9px; color:#22c55e; font-weight:800; padding:2px 6px; border-radius:5px; background:rgba(34,197,94,.15); margin-left:6px; letter-spacing:.5px; text-transform:uppercase; }
   .rank-meta { font-size:11px; color:var(--text-dim); font-weight:600; margin-top:2px; }
   .rank-score { font-size:14px; font-weight:900; color:var(--gold); white-space:nowrap; }
   .rank-score small { font-size:10px; color:var(--text-dim); font-weight:600; display:block; }
-  .rank-refresh-btn {
-    background:linear-gradient(135deg,#22c55e,#16a34a);
-    border:none; color:#fff; padding:6px 14px;
-    border-radius:20px; font-weight:800; font-size:12px;
-    cursor:pointer; font-family:inherit;
-    display:inline-flex; align-items:center; gap:4px;
-    transition:all .15s;
-  }
+  .rank-refresh-btn { background:linear-gradient(135deg,#22c55e,#16a34a); border:none; color:#fff; padding:6px 14px; border-radius:20px; font-weight:800; font-size:12px; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:4px; transition:all .15s; }
   .rank-refresh-btn:hover { transform:translateY(-2px); box-shadow:0 4px 12px rgba(34,197,94,.5); }
   .rank-refresh-btn.spin { animation:spin .6s linear; }
   @keyframes spin { to { transform:rotate(360deg); } }
-  .rank-loading {
-    text-align:center; padding:40px 20px;
-    color:var(--text-dim); font-size:13px; font-style:italic;
-  }
-  .rank-name-edit {
-    background:linear-gradient(135deg,#22c55e,#16a34a);
-    border:none; color:#fff; padding:6px 14px;
-    border-radius:20px; font-weight:800; font-size:12px;
-    cursor:pointer; font-family:inherit;
-    transition:all .15s;
-  }
+  .rank-loading { text-align:center; padding:40px 20px; color:var(--text-dim); font-size:13px; font-style:italic; }
+  .rank-name-edit { background:linear-gradient(135deg,#22c55e,#16a34a); border:none; color:#fff; padding:6px 14px; border-radius:20px; font-weight:800; font-size:12px; cursor:pointer; font-family:inherit; transition:all .15s; }
   .rank-name-edit:hover { transform:translateY(-2px); box-shadow:0 4px 12px rgba(34,197,94,.5); }
-  .rank-tabs {
-    display: flex; gap: 6px; margin-bottom: 14px;
-    background: var(--bg-2); border-radius: 10px; padding: 4px;
-  }
-  .rank-tab {
-    flex: 1; padding: 8px 14px; border-radius: 8px;
-    background: transparent; border: none; color: var(--text-dim);
-    font-family: inherit; font-weight: 800; font-size: 12px;
-    cursor: pointer; transition: all .15s;
-  }
+  .rank-tabs { display: flex; gap: 6px; margin-bottom: 14px; background: var(--bg-2); border-radius: 10px; padding: 4px; }
+  .rank-tab { flex: 1; padding: 8px 14px; border-radius: 8px; background: transparent; border: none; color: var(--text-dim); font-family: inherit; font-weight: 800; font-size: 12px; cursor: pointer; transition: all .15s; }
   .rank-tab:hover { color: var(--text); }
-  .rank-tab.active {
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    color: #fff; box-shadow: 0 3px 10px rgba(34,197,94,.4);
-  }
-  .week-info {
-    font-size: 11px; color: var(--text-dim); text-align: center;
-    margin-bottom: 12px; font-style: italic;
-  }
-  .update-card {
-    background: linear-gradient(160deg, var(--bg-2), var(--bg-1));
-    border: 3px solid #22c55e; border-radius: 20px;
-    padding: 28px 32px; max-width: 440px; width: 100%;
-    text-align: center;
-    animation: revealPop .5s cubic-bezier(.34,1.56,.64,1);
-    box-shadow: 0 0 60px rgba(34,197,94,.4);
-    position: relative; z-index: 1001;
-  }
+  .rank-tab.active { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; box-shadow: 0 3px 10px rgba(34,197,94,.4); }
+  .week-info { font-size: 11px; color: var(--text-dim); text-align: center; margin-bottom: 12px; font-style: italic; }
+  .update-card { background: linear-gradient(160deg, var(--bg-2), var(--bg-1)); border: 3px solid #22c55e; border-radius: 20px; padding: 28px 32px; max-width: 440px; width: 100%; text-align: center; animation: revealPop .5s cubic-bezier(.34,1.56,.64,1); box-shadow: 0 0 60px rgba(34,197,94,.4); position: relative; z-index: 1001; }
   .update-icon { font-size: 54px; margin-bottom: 8px; animation: bounce .6s ease-in-out infinite alternate; }
-  .update-title {
-    font-size: 20px; font-weight: 800; margin-bottom: 6px;
-    background: linear-gradient(90deg,#22c55e,#16a34a);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-  }
+  .update-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; background: linear-gradient(90deg,#22c55e,#16a34a); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .update-version { font-size: 14px; color: var(--gold); font-weight: 700; margin-bottom: 14px; }
-  .update-notes {
-    background: rgba(0,0,0,.25); border: 1px solid var(--border);
-    border-radius: 10px; padding: 12px 14px;
-    font-size: 12px; line-height: 1.6; text-align: left;
-    max-height: 160px; overflow-y: auto; margin-bottom: 18px;
-    white-space: pre-wrap;
-  }
-  .update-notes::-webkit-scrollbar { width: 6px; }
-  .update-notes::-webkit-scrollbar-track { background: var(--bg-0); border-radius: 3px; }
-  .update-notes::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .update-notes { background: rgba(0,0,0,.25); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 12px; line-height: 1.6; text-align: left; max-height: 160px; overflow-y: auto; margin-bottom: 18px; white-space: pre-wrap; }
   .update-actions { display: flex; gap: 10px; }
-  .update-actions button {
-    flex: 1; padding: 12px 16px; border-radius: 10px;
-    font-weight: 800; font-size: 14px; cursor: pointer;
-    font-family: inherit; border: none; transition: all .15s;
-  }
+  .update-actions button { flex: 1; padding: 12px 16px; border-radius: 10px; font-weight: 800; font-size: 14px; cursor: pointer; font-family: inherit; border: none; transition: all .15s; }
   .update-later { background: var(--bg-3); color: var(--text); border: 1px solid var(--border) !important; }
-  .update-later:hover { background: #374151; }
-  .update-now {
-    background: linear-gradient(135deg,#22c55e,#16a34a); color: #fff;
-    box-shadow: 0 4px 14px rgba(34,197,94,.5);
-  }
-  .update-now:hover { transform: scale(1.03); box-shadow: 0 6px 20px rgba(34,197,94,.7); }
+  .update-now { background: linear-gradient(135deg,#22c55e,#16a34a); color: #fff; box-shadow: 0 4px 14px rgba(34,197,94,.5); }
   .update-progress { margin-top: 16px; }
-  .update-bar {
-    height: 12px; background: var(--bg-0); border-radius: 6px;
-    overflow: hidden; border: 1px solid var(--border); margin-bottom: 6px;
-  }
-  .update-fill {
-    height: 100%; width: 0%; border-radius: 6px;
-    background: linear-gradient(90deg,#22c55e,#fbbf24);
-    transition: width .3s ease;
-    box-shadow: 0 0 12px rgba(34,197,94,.6);
-  }
+  .update-bar { height: 12px; background: var(--bg-0); border-radius: 6px; overflow: hidden; border: 1px solid var(--border); margin-bottom: 6px; }
+  .update-fill { height: 100%; width: 0%; border-radius: 6px; background: linear-gradient(90deg,#22c55e,#fbbf24); transition: width .3s ease; box-shadow: 0 0 12px rgba(34,197,94,.6); }
   .update-percent { font-size: 13px; font-weight: 800; color: var(--gold); }
-  .update-ready { margin-top: 16px; }
-  .update-restart {
-    width: 100%; padding: 12px; border-radius: 10px; border: none;
-    background: linear-gradient(135deg,#a855f7,#ec4899); color: #fff;
-    font-weight: 800; font-size: 14px; cursor: pointer; font-family: inherit;
-    box-shadow: 0 4px 14px rgba(168,85,247,.5); transition: all .15s;
-  }
-  .update-restart:hover { transform: scale(1.03); box-shadow: 0 6px 20px rgba(168,85,247,.7); }
-  .update-badge {
-    display: none;
-    background: linear-gradient(135deg,#22c55e,#16a34a);
-    color: #fff; padding: 6px 14px; border-radius: 20px;
-    font-weight: 800; font-size: 12px; cursor: pointer;
-    border: none; font-family: inherit;
-    box-shadow: 0 4px 12px rgba(34,197,94,.5);
-    animation: pulseBadge 1.5s ease-in-out infinite;
-  }
+  .update-restart { width: 100%; padding: 12px; border-radius: 10px; border: none; background: linear-gradient(135deg,#a855f7,#ec4899); color: #fff; font-weight: 800; font-size: 14px; cursor: pointer; font-family: inherit; box-shadow: 0 4px 14px rgba(168,85,247,.5); transition: all .15s; }
+  .update-badge { display: none; background: linear-gradient(135deg,#22c55e,#16a34a); color: #fff; padding: 6px 14px; border-radius: 20px; font-weight: 800; font-size: 12px; cursor: pointer; border: none; font-family: inherit; box-shadow: 0 4px 12px rgba(34,197,94,.5); animation: pulseBadge 1.5s ease-in-out infinite; }
   .update-badge.show { display: inline-flex; align-items: center; gap: 5px; }
-  .update-badge:hover { transform: scale(1.06); }
-  .name-card {
-    background: linear-gradient(160deg, var(--bg-2), var(--bg-1));
-    border: 2px solid var(--accent); border-radius: 18px;
-    padding: 24px 28px; max-width: 400px; width: 100%;
-    text-align: center;
-    animation: revealPop .35s cubic-bezier(.34,1.56,.64,1);
-    box-shadow: 0 0 40px rgba(56,189,248,.4);
-  }
+  .name-card { background: linear-gradient(160deg, var(--bg-2), var(--bg-1)); border: 2px solid var(--accent); border-radius: 18px; padding: 24px 28px; max-width: 400px; width: 100%; text-align: center; animation: revealPop .35s cubic-bezier(.34,1.56,.64,1); box-shadow: 0 0 40px rgba(56,189,248,.4); }
   .name-icon { font-size: 48px; margin-bottom: 8px; }
-  .name-title {
-    font-size: 18px; font-weight: 800; margin-bottom: 4px;
-    background: linear-gradient(90deg, #38bdf8, #a855f7);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-  }
-  .name-subtitle {
-    font-size: 11px; color: var(--text-dim);
-    margin-bottom: 16px; text-transform: uppercase;
-    letter-spacing: 1px; font-weight: 700;
-  }
-  .name-input {
-    width: 100%; background: var(--bg-0);
-    border: 2px solid var(--border); color: var(--text);
-    padding: 12px 16px; border-radius: 10px;
-    font-size: 16px; font-weight: 700; font-family: inherit;
-    outline: none; text-align: center;
-    transition: border-color .15s; margin-bottom: 16px;
-  }
+  .name-title { font-size: 18px; font-weight: 800; margin-bottom: 4px; background: linear-gradient(90deg, #38bdf8, #a855f7); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .name-subtitle { font-size: 11px; color: var(--text-dim); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+  .name-input { width: 100%; background: var(--bg-0); border: 2px solid var(--border); color: var(--text); padding: 12px 16px; border-radius: 10px; font-size: 16px; font-weight: 700; font-family: inherit; outline: none; text-align: center; transition: border-color .15s; margin-bottom: 16px; }
   .name-input:focus { border-color: var(--accent); box-shadow: 0 0 12px rgba(56,189,248,.3); }
   .name-actions { display: flex; gap: 10px; }
-  .name-actions button {
-    flex: 1; padding: 12px 16px; border-radius: 10px;
-    font-weight: 800; font-size: 14px; cursor: pointer;
-    font-family: inherit; border: none; transition: all .15s;
-  }
+  .name-actions button { flex: 1; padding: 12px 16px; border-radius: 10px; font-weight: 800; font-size: 14px; cursor: pointer; font-family: inherit; border: none; transition: all .15s; }
   .name-cancel { background: var(--bg-3); color: var(--text); border: 1px solid var(--border) !important; }
-  .name-cancel:hover { background: #374151; }
-  .name-confirm {
-    background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff;
-    box-shadow: 0 4px 14px rgba(34,197,94,.5);
-  }
-  .name-confirm:hover { transform: scale(1.03); box-shadow: 0 6px 20px rgba(34,197,94,.7); }
+  .name-confirm { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; box-shadow: 0 4px 14px rgba(34,197,94,.5); }
   .chat-container { display: flex; flex-direction: column; height: 60vh; gap: 8px; }
   .chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 6px; }
-  .chat-messages::-webkit-scrollbar { width: 6px; }
-  .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-  .chat-msg {
-    padding: 8px 12px; border-radius: 10px; background: var(--bg-2);
-    font-size: 13px; border-left: 3px solid var(--border);
-    animation: chatIn .25s ease-out;
-  }
+  .chat-msg { padding: 8px 12px; border-radius: 10px; background: var(--bg-2); font-size: 13px; border-left: 3px solid var(--border); animation: chatIn .25s ease-out; }
   .chat-msg.you { background: rgba(34,197,94,.12); border-left-color: #22c55e; }
   .chat-msg .cm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
   .chat-msg .cm-name { font-weight: 800; font-size: 11px; color: var(--accent); }
   .chat-msg.you .cm-name { color: #22c55e; }
   .chat-msg .cm-time { font-size: 9px; color: var(--text-dim); }
   .chat-msg .cm-text { color: var(--text); word-break: break-word; }
+  .chat-msg .cm-delete { background: transparent; border: none; color: var(--text-dim); font-size: 12px; cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: all .15s; margin-left: 6px; }
+  .chat-msg .cm-delete:hover { background: rgba(239,68,68,.2); color: #ef4444; }
   .chat-input-row { display: flex; gap: 8px; }
-  .chat-input {
-    flex: 1; background: var(--bg-0); border: 2px solid var(--border);
-    color: var(--text); padding: 10px 14px; border-radius: 10px;
-    font-size: 13px; font-family: inherit; outline: none;
-  }
+  .chat-input { flex: 1; background: var(--bg-0); border: 2px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 10px; font-size: 13px; font-family: inherit; outline: none; }
   .chat-input:focus { border-color: var(--accent); }
-  .chat-send-btn {
-    background: linear-gradient(135deg, #38bdf8, #0ea5e9);
-    border: none; color: #fff; padding: 10px 18px; border-radius: 10px;
-    font-weight: 800; cursor: pointer; font-family: inherit; transition: transform .15s;
-  }
+  .chat-send-btn { background: linear-gradient(135deg, #38bdf8, #0ea5e9); border: none; color: #fff; padding: 10px 18px; border-radius: 10px; font-weight: 800; cursor: pointer; font-family: inherit; transition: transform .15s; }
   .chat-send-btn:hover { transform: scale(1.05); }
-  .gift-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px; margin-bottom: 8px; background: var(--bg-2);
-    border-radius: 12px; border-left: 4px solid var(--gold);
-  }
+  .gift-item { display: flex; align-items: center; gap: 12px; padding: 12px; margin-bottom: 8px; background: var(--bg-2); border-radius: 12px; border-left: 4px solid var(--gold); }
   .gift-pet-emoji { font-size: 32px; }
   .gift-info { flex: 1; min-width: 0; }
   .gift-from { font-size: 11px; color: var(--text-dim); font-weight: 700; }
   .gift-pet-name { font-size: 14px; font-weight: 800; margin: 2px 0; }
   .gift-rarity { font-size: 10px; font-weight: 800; text-transform: uppercase; }
   .gift-actions { display: flex; gap: 6px; }
-  .gift-action-btn {
-    border: none; border-radius: 8px; padding: 8px 14px;
-    font-weight: 800; font-size: 12px; cursor: pointer;
-    font-family: inherit; transition: transform .15s;
-  }
+  .gift-action-btn { border: none; border-radius: 8px; padding: 8px 14px; font-weight: 800; font-size: 12px; cursor: pointer; font-family: inherit; transition: transform .15s; }
   .gift-accept { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
   .gift-reject { background: var(--bg-3); color: var(--text); border: 1px solid var(--border) !important; }
   .gift-action-btn:hover { transform: scale(1.05); }
-  .gift-badge {
-    display: inline-flex; align-items: center; justify-content: center;
-    background: #ef4444; color: #fff; font-size: 10px; font-weight: 800;
-    border-radius: 10px; padding: 1px 6px; margin-left: 4px;
-    min-width: 16px; animation: pulseBadge 1.5s ease-in-out infinite;
-  }
-  .send-gift-pet {
-    display: flex; align-items: center; gap: 10px;
-    padding: 12px; background: var(--bg-2); border-radius: 12px;
-    margin-bottom: 14px; border: 2px solid var(--border);
-  }
+  .gift-badge { display: inline-flex; align-items: center; justify-content: center; background: #ef4444; color: #fff; font-size: 10px; font-weight: 800; border-radius: 10px; padding: 1px 6px; margin-left: 4px; min-width: 16px; animation: pulseBadge 1.5s ease-in-out infinite; }
+  .send-gift-pet { display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--bg-2); border-radius: 12px; margin-bottom: 14px; border: 2px solid var(--border); }
   .send-gift-pet .sgp-emoji { font-size: 40px; }
   .send-gift-pet .sgp-info { flex: 1; min-width: 0; }
   .send-gift-pet .sgp-name { font-weight: 800; font-size: 15px; }
   .send-gift-pet .sgp-meta { font-size: 11px; color: var(--text-dim); font-weight: 700; margin-top: 2px; }
+  .friend-tabs { display:flex; gap:6px; margin-bottom:14px; background:var(--bg-2); border-radius:10px; padding:4px; }
+  .friend-tab { flex:1; padding:8px 14px; border-radius:8px; background:transparent; border:none; color:var(--text-dim); font-family:inherit; font-weight:800; font-size:12px; cursor:pointer; transition:all .15s; }
+  .friend-tab:hover { color:var(--text); }
+  .friend-tab.active { background:linear-gradient(135deg,#ec4899,#db2777); color:#fff; box-shadow:0 3px 10px rgba(236,72,153,.4); }
+  .friend-row { display:grid; grid-template-columns:50px 1fr auto; align-items:center; gap:12px; padding:10px 14px; border-radius:10px; background:var(--bg-2); border:1px solid var(--border); margin-bottom:6px; transition:transform .15s; }
+  .friend-row:hover { background:var(--bg-3); transform:translateX(3px); }
+  .friend-avatar { font-size:22px; text-align:center; }
+  .friend-info { min-width:0; }
+  .friend-name { font-weight:800; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .friend-meta { font-size:10px; color:var(--text-dim); font-weight:600; margin-top:2px; }
+  .friend-status { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; }
+  .friend-status.online { background:#22c55e; box-shadow:0 0 6px #22c55e; }
+  .friend-status.offline { background:#6b7280; }
+  .friend-actions { display:flex; gap:4px; }
+  .friend-btn { background:var(--bg-3); border:1px solid var(--border); color:var(--text); padding:6px 10px; border-radius:8px; font-size:11px; font-weight:800; cursor:pointer; font-family:inherit; transition:all .15s; }
+  .friend-btn:hover { background:var(--accent); color:#0a0f1e; }
+  .friend-btn.accept { background:#22c55e; color:#fff; border-color:transparent; }
+  .friend-btn.accept:hover { background:#16a34a; }
+  .friend-btn.danger { background:rgba(239,68,68,.15); color:#ef4444; border-color:rgba(239,68,68,.3); }
+  .friend-btn.danger:hover { background:#ef4444; color:#fff; }
+  .pm-list { display:flex; flex-direction:column; gap:6px; }
+  .pm-conv { display:flex; align-items:center; gap:12px; padding:12px; background:var(--bg-2); border-radius:10px; cursor:pointer; border-left:4px solid var(--accent); transition:all .15s; }
+  .pm-conv:hover { background:var(--bg-3); transform:translateX(3px); }
+  .pm-conv.unread { border-left-color:#ef4444; background:rgba(239,68,68,.05); }
+  .pm-conv-info { flex:1; min-width:0; }
+  .pm-conv-name { font-weight:800; font-size:13px; }
+  .pm-conv-preview { font-size:11px; color:var(--text-dim); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .pm-conv-time { font-size:10px; color:var(--text-dim); font-weight:600; }
+  .pm-thread { display:flex; flex-direction:column; height:50vh; gap:8px; }
+  .pm-thread-msgs { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-right:6px; }
+  .pm-msg { max-width:75%; padding:8px 12px; border-radius:12px; font-size:13px; word-break:break-word; animation:chatIn .25s ease-out; }
+  .pm-msg.them { background:var(--bg-2); align-self:flex-start; border-bottom-left-radius:4px; }
+  .pm-msg.me { background:linear-gradient(135deg,#8b5cf6,#6366f1); color:#fff; align-self:flex-end; border-bottom-right-radius:4px; }
+  .pm-msg-time { font-size:9px; opacity:.7; margin-top:3px; }
+  .pm-back-btn { background:var(--bg-3); border:1px solid var(--border); color:var(--text); padding:6px 12px; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer; font-family:inherit; }
+  .pm-back-btn:hover { background:var(--bg-2); }
+  .theme-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; }
+  .theme-card { padding:20px; border-radius:14px; cursor:pointer; border:3px solid transparent; transition:all .2s; text-align:center; position:relative; overflow:hidden; }
+  .theme-card:hover { transform:translateY(-4px); }
+  .theme-card.active { border-color:var(--gold); box-shadow:0 0 20px rgba(251,191,36,.5); }
+  .theme-card.locked { opacity:.5; cursor:not-allowed; filter:grayscale(.8); }
+  .theme-card.locked:hover { transform:none; }
+  .theme-preview { font-size:44px; margin-bottom:8px; }
+  .theme-name { font-weight:800; font-size:15px; }
+  .theme-req { font-size:11px; color:var(--text-dim); font-weight:700; margin-top:4px; }
+  .theme-check { position:absolute; top:8px; right:8px; font-size:16px; }
+  .send-clicks-box { text-align:center; padding:10px; }
+  .send-clicks-box h3 { font-size:14px; margin-bottom:12px; color:var(--text); text-transform:none; letter-spacing:0; }
+  .amount-presets { display:flex; gap:6px; margin:12px 0; flex-wrap:wrap; justify-content:center; }
+  .amount-preset { background:var(--bg-3); border:1px solid var(--border); color:var(--text); padding:6px 12px; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer; font-family:inherit; transition:all .15s; }
+  .amount-preset:hover { background:var(--accent); color:#0a0f1e; }
   #toast {
     position:fixed; bottom:30px; left:50%; transform:translateX(-50%);
     background:var(--bg-2); border:1px solid var(--accent); color:var(--text);
@@ -866,111 +867,44 @@
     75% { transform:translateX(6px); }
   }
   .shake { animation:shake .3s; }
-
-  /* TUTORIAL */
-  .tutorial-overlay {
-    position:fixed; inset:0; background:rgba(0,0,0,.85);
-    backdrop-filter:blur(8px); z-index:5000;
-    display:none; align-items:center; justify-content:center;
-    padding:20px;
-  }
+  .tutorial-overlay { position:fixed; inset:0; background:rgba(0,0,0,.85); backdrop-filter:blur(8px); z-index:5000; display:none; align-items:center; justify-content:center; padding:20px; }
   .tutorial-overlay.show { display:flex; }
-  .tutorial-card {
-    background:linear-gradient(160deg,var(--bg-2),var(--bg-1));
-    border:3px solid var(--accent); border-radius:20px;
-    padding:28px 32px; max-width:460px; width:100%;
-    text-align:center;
-    animation:revealPop .4s cubic-bezier(.34,1.56,.64,1);
-    box-shadow:0 0 60px rgba(56,189,248,.5);
-    position:relative;
-  }
+  .tutorial-card { background:linear-gradient(160deg,var(--bg-2),var(--bg-1)); border:3px solid var(--accent); border-radius:20px; padding:28px 32px; max-width:460px; width:100%; text-align:center; animation:revealPop .4s cubic-bezier(.34,1.56,.64,1); box-shadow:0 0 60px rgba(56,189,248,.5); }
   .tutorial-icon { font-size:64px; margin-bottom:10px; animation:bounce .6s ease-in-out infinite alternate; }
-  .tutorial-title {
-    font-size:22px; font-weight:800; margin-bottom:10px;
-    background:linear-gradient(90deg,#38bdf8,#a855f7);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-  }
-  .tutorial-text {
-    font-size:14px; color:var(--text); line-height:1.7;
-    margin-bottom:22px; padding:14px;
-    background:rgba(56,189,248,.08);
-    border-radius:12px; border:1px solid rgba(56,189,248,.2);
-  }
+  .tutorial-title { font-size:22px; font-weight:800; margin-bottom:10px; background:linear-gradient(90deg,#38bdf8,#a855f7); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .tutorial-text { font-size:14px; color:var(--text); line-height:1.7; margin-bottom:22px; padding:14px; background:rgba(56,189,248,.08); border-radius:12px; border:1px solid rgba(56,189,248,.2); }
   .tutorial-text b { color:var(--gold); }
   .tutorial-text .highlight { color:var(--accent); font-weight:800; }
-  .tutorial-progress {
-    display:flex; gap:6px; justify-content:center; margin-bottom:16px;
-  }
-  .tutorial-dot {
-    width:8px; height:8px; border-radius:50%;
-    background:var(--bg-3); transition:all .3s;
-  }
+  .tutorial-progress { display:flex; gap:6px; justify-content:center; margin-bottom:16px; }
+  .tutorial-dot { width:8px; height:8px; border-radius:50%; background:var(--bg-3); transition:all .3s; }
   .tutorial-dot.active { background:var(--accent); width:24px; border-radius:4px; }
   .tutorial-dot.done { background:#22c55e; }
   .tutorial-actions { display:flex; gap:10px; }
-  .tutorial-actions button {
-    flex:1; padding:12px 16px; border-radius:10px;
-    font-weight:800; font-size:14px; cursor:pointer;
-    font-family:inherit; border:none; transition:all .15s;
-  }
-  .tutorial-skip {
-    background:var(--bg-3); color:var(--text-dim);
-    border:1px solid var(--border) !important;
-    font-size:12px !important; flex:0 0 auto !important;
-    padding:12px 14px !important;
-  }
-  .tutorial-skip:hover { background:#374151; color:var(--text); }
-  .tutorial-next {
-    background:linear-gradient(135deg,#38bdf8,#0ea5e9); color:#fff;
-    box-shadow:0 4px 14px rgba(56,189,248,.5);
-  }
-  .tutorial-next:hover { transform:scale(1.03); box-shadow:0 6px 20px rgba(56,189,248,.7); }
-  .tutorial-highlight {
-    position:relative; z-index:5001;
-    animation:tutorialPulse 1.2s ease-in-out infinite;
-    pointer-events:none;
-  }
-  @keyframes tutorialPulse {
-    0%,100% { box-shadow:0 0 0 0 rgba(56,189,248,.8); }
-    50% { box-shadow:0 0 0 20px rgba(56,189,248,0); }
-  }
-
-  /* OFFLINE */
-  .offline-card {
-    background:linear-gradient(160deg,var(--bg-2),var(--bg-1));
-    border:3px solid var(--gold); border-radius:20px;
-    padding:28px 32px; max-width:440px; width:100%;
-    text-align:center;
-    animation:revealPop .5s cubic-bezier(.34,1.56,.64,1);
-    box-shadow:0 0 60px rgba(251,191,36,.5);
-  }
+  .tutorial-actions button { flex:1; padding:12px 16px; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; font-family:inherit; border:none; transition:all .15s; }
+  .tutorial-skip { background:var(--bg-3); color:var(--text-dim); border:1px solid var(--border) !important; font-size:12px !important; flex:0 0 auto !important; padding:12px 14px !important; }
+  .tutorial-next { background:linear-gradient(135deg,#38bdf8,#0ea5e9); color:#fff; box-shadow:0 4px 14px rgba(56,189,248,.5); }
+  .tutorial-highlight { position:relative; z-index:5001; animation:tutorialPulse 1.2s ease-in-out infinite; pointer-events:none; }
+  @keyframes tutorialPulse { 0%,100% { box-shadow:0 0 0 0 rgba(56,189,248,.8); } 50% { box-shadow:0 0 0 20px rgba(56,189,248,0); } }
+  .offline-card { background:linear-gradient(160deg,var(--bg-2),var(--bg-1)); border:3px solid var(--gold); border-radius:20px; padding:28px 32px; max-width:440px; width:100%; text-align:center; animation:revealPop .5s cubic-bezier(.34,1.56,.64,1); box-shadow:0 0 60px rgba(251,191,36,.5); }
   .offline-icon { font-size:60px; margin-bottom:10px; animation:bounce .6s ease-in-out infinite alternate; }
-  .offline-title {
-    font-size:22px; font-weight:800; margin-bottom:10px;
-    background:linear-gradient(90deg,#fbbf24,#f59e0b);
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-  }
-  .offline-time {
-    font-size:13px; color:var(--text-dim); font-weight:700;
-    margin-bottom:16px;
-  }
-  .offline-reward {
-    font-size:32px; font-weight:900; color:var(--gold);
-    margin-bottom:20px;
-    text-shadow:0 0 20px rgba(251,191,36,.6);
-  }
-  .offline-claim {
-    width:100%; padding:14px; border-radius:12px; border:none;
-    background:linear-gradient(135deg,#fbbf24,#f59e0b);
-    color:#111; font-weight:800; font-size:15px;
-    cursor:pointer; font-family:inherit;
-    box-shadow:0 4px 16px rgba(251,191,36,.6);
-    transition:transform .15s;
-  }
-  .offline-claim:hover { transform:scale(1.03); box-shadow:0 6px 24px rgba(251,191,36,.8); }
+  .offline-title { font-size:22px; font-weight:800; margin-bottom:10px; background:linear-gradient(90deg,#fbbf24,#f59e0b); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .offline-time { font-size:13px; color:var(--text-dim); font-weight:700; margin-bottom:16px; }
+  .offline-reward { font-size:32px; font-weight:900; color:var(--gold); margin-bottom:20px; text-shadow:0 0 20px rgba(251,191,36,.6); }
+  .offline-claim { width:100%; padding:14px; border-radius:12px; border:none; background:linear-gradient(135deg,#fbbf24,#f59e0b); color:#111; font-weight:800; font-size:15px; cursor:pointer; font-family:inherit; box-shadow:0 4px 16px rgba(251,191,36,.6); transition:transform .15s; }
+  .events-banner { position:sticky; top:0; z-index:200; background:linear-gradient(90deg, rgba(251,191,36,.95), rgba(245,158,11,.95)); color:#111; padding:10px 20px; display:flex; align-items:center; gap:12px; font-weight:800; font-size:14px; box-shadow:0 4px 20px rgba(251,191,36,.4); animation:eventPulse 2s ease-in-out infinite; }
+  @keyframes eventPulse { 0%,100% { box-shadow:0 4px 20px rgba(251,191,36,.4); } 50% { box-shadow:0 4px 30px rgba(251,191,36,.8), 0 0 40px rgba(251,191,36,.4); } }
+  .events-banner .eb-emoji { font-size:22px; }
+  .events-banner .eb-info { flex:1; min-width:0; }
+  .events-banner .eb-title { font-weight:900; font-size:15px; letter-spacing:.5px; }
+  .events-banner .eb-desc { font-size:11px; opacity:.85; font-weight:600; margin-top:2px; }
+  .events-banner .eb-time { background:rgba(0,0,0,.2); padding:5px 12px; border-radius:20px; font-size:12px; font-weight:900; white-space:nowrap; }
+  .events-banner.multiple { background:linear-gradient(90deg, rgba(168,85,247,.95), rgba(236,72,153,.95)); color:#fff; }
+  .events-banner.multiple .eb-time { background:rgba(255,255,255,.2); }
 </style>
 </head>
 <body>
+
+<div class="events-banner" id="eventsBanner" style="display:none;"></div>
 
 <header>
   <div class="brand">🐾 Clicker Simulator</div>
@@ -978,6 +912,9 @@
   <div class="stat">✨ <span class="val accent" id="uiCpc">1</span>/clique</div>
   <div class="stat">🔄 <span class="val" id="uiRebirths">0</span></div>
   <button class="update-badge" id="updateBadge" title="Nova versão disponível!">🆕 Nova versão</button>
+  <button class="hdr-btn themes-btn" id="themesBtn" title="Temas">🌈</button>
+  <button class="hdr-btn friends-btn" id="friendsBtn" title="Amigos">👥<span class="notif-badge" id="friendsBadge" style="display:none;">0</span></button>
+  <button class="hdr-btn pm-btn" id="pmBtn" title="Mensagens">💌<span class="notif-badge" id="pmBadge" style="display:none;">0</span></button>
   <button class="hdr-btn chat-btn" id="chatBtn" title="Chat global">💬</button>
   <button class="hdr-btn gifts-btn" id="giftsBtn" title="Presentes">🎁<span class="gift-badge" id="giftsBadge" style="display:none;">0</span></button>
   <button class="hdr-btn collection-btn" id="collectionBtn" title="Coleção">🏆</button>
@@ -1019,9 +956,9 @@
       <button class="mini-toggle" id="autoEquipBtn" title="Equipar automaticamente os melhores">🎯 Auto</button>
     </div>
     <div class="equipped-grid" id="equippedSlots"></div>
-    <h3>🎒 Inventário (<span id="invCount">0</span>)</h3>
-    <button class="sell-dupes-btn" id="sellDupesBtn" style="display:none;">💰 Vender Duplicados</button>
-    <div class="inv-list" id="inventoryList"></div>
+    <button class="open-inv-btn" id="openInventoryBtn">
+      🎒 Abrir Inventário <span class="oib-count" id="invCountBtn">0</span>
+    </button>
   </aside>
 </main>
 
@@ -1212,6 +1149,105 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="friendsModal">
+  <div class="modal-card" style="max-width:520px;">
+    <div class="modal-header">
+      <h2 style="background:linear-gradient(90deg,#ec4899,#db2777);-webkit-background-clip:text;background-clip:text;color:transparent;">👥 Amigos</h2>
+      <button class="close-x" id="friendsClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="friend-tabs">
+        <button class="friend-tab active" id="friendTabList">👥 Lista (<span id="friendCount">0</span>)</button>
+        <button class="friend-tab" id="friendTabRequests">📩 Pedidos (<span id="requestCount">0</span>)</button>
+        <button class="friend-tab" id="friendTabAdd">➕ Adicionar</button>
+      </div>
+      <div id="friendsBody"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="pmModal">
+  <div class="modal-card" style="max-width:520px;">
+    <div class="modal-header">
+      <h2 style="background:linear-gradient(135deg,#8b5cf6,#6366f1);-webkit-background-clip:text;background-clip:text;color:transparent;">💌 Mensagens</h2>
+      <button class="close-x" id="pmClose">✕</button>
+    </div>
+    <div class="modal-body" id="pmBody"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="themesModal">
+  <div class="modal-card" style="max-width:520px;">
+    <div class="modal-header">
+      <h2 style="background:linear-gradient(135deg,#f59e0b,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent;">🌈 Temas</h2>
+      <button class="close-x" id="themesClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--text-dim);margin-bottom:16px;text-align:center;">
+        Desbloqueia novos temas com <b style="color:var(--gold)">Rebirths</b>!
+      </p>
+      <div class="theme-grid" id="themeGrid"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="sendClicksModal">
+  <div class="modal-card" style="max-width:420px;">
+    <div class="modal-header">
+      <h2 style="background:linear-gradient(135deg,#fbbf24,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent;">💰 Enviar Cliques</h2>
+      <button class="close-x" id="sendClicksClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="send-clicks-box">
+        <h3 id="sendClicksTo">Enviar para: <b style="color:var(--gold)">—</b></h3>
+        <p style="font-size:11px;color:var(--text-dim);margin:8px 0;">Podes enviar apenas o que tens.</p>
+        <input type="number" class="name-input" id="sendClicksAmount" placeholder="Quantidade" min="1" style="margin-bottom:12px;">
+        <div class="amount-presets">
+          <button class="amount-preset" data-amt="1000">1K</button>
+          <button class="amount-preset" data-amt="10000">10K</button>
+          <button class="amount-preset" data-amt="100000">100K</button>
+          <button class="amount-preset" data-amt="1000000">1M</button>
+          <button class="amount-preset" data-amt="10000000">10M</button>
+          <button class="amount-preset" data-amt="max">MAX</button>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px;">
+          <button class="name-cancel" style="flex:1;padding:12px;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;background:var(--bg-3);color:var(--text);border:1px solid var(--border);" id="sendClicksCancel">Cancelar</button>
+          <button class="name-confirm" style="flex:1;padding:12px;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#111;border:none;" id="sendClicksConfirm">Enviar 💰</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DO INVENTÁRIO -->
+<div class="modal-overlay" id="inventoryModal">
+  <div class="modal-card inv-modal-card">
+    <div class="modal-header">
+      <h2 style="background:linear-gradient(135deg,#8b5cf6,#6366f1);-webkit-background-clip:text;background-clip:text;color:transparent;">🎒 Inventário</h2>
+      <button class="rank-refresh-btn" id="invSellDupesBtn" style="background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#111;">💰 Vender Duplicados</button>
+      <button class="close-x" id="inventoryClose">✕</button>
+    </div>
+    <div class="inv-controls">
+      <input type="text" class="inv-search" id="invSearchModal" placeholder="🔍 Pesquisar pet pelo nome...">
+      <span class="inv-count-badge" id="invCountBadge">0 pets</span>
+    </div>
+    <div class="inv-filter-bar" id="invFilterBar">
+      <button class="inv-filter-btn active" data-filter="all">📦 Todos</button>
+      <button class="inv-filter-btn" data-filter="equipped">⚔️ Equipados</button>
+      <button class="inv-filter-btn" data-filter="pinned">📌 Fixados</button>
+      <button class="inv-filter-btn" data-filter="comum">⚪ Comum</button>
+      <button class="inv-filter-btn" data-filter="incomum">🟢 Incomum</button>
+      <button class="inv-filter-btn" data-filter="raro">🔵 Raro</button>
+      <button class="inv-filter-btn" data-filter="epico">🟣 Épico</button>
+      <button class="inv-filter-btn" data-filter="lendario">🟡 Lendário</button>
+      <button class="inv-filter-btn" data-filter="mitico">🔴 Mítico</button>
+    </div>
+    <div class="modal-body">
+      <div class="inv-pets-grid" id="invPetsGrid"></div>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -1238,73 +1274,83 @@ const FUSION_FACTOR = 4;
 const REBIRTH_BASE_COST = 50000;
 const REBIRTH_MULT = 4;
 
+const THEMES = [
+  { id:'default',  name:'Azul Clássico', emoji:'💙', req:0,  color:'#38bdf8' },
+  { id:'verde',    name:'Floresta',      emoji:'💚', req:1,  color:'#22c55e' },
+  { id:'roxo',     name:'Místico',       emoji:'💜', req:3,  color:'#a855f7' },
+  { id:'dourado',  name:'Dourado',       emoji:'💛', req:6,  color:'#fbbf24' },
+  { id:'vermelho', name:'Inferno',       emoji:'❤️', req:10, color:'#ef4444' },
+];
+
 const WORLDS = [
   { name:'Iniciante', emoji:'🌱', unlock:0, theme:'linear-gradient(135deg,#065f46,#134e4a)', eggs:[
       { name:'Ovo Básico', emoji:'🥚', cost:100, pets:{
-        comum:[['Gatinho','🐱',1.5],['Cachorrinho','🐶',1.5]],
-        incomum:[['Coelho','🐰',3]], raro:[['Raposa','🦊',7]],
+        comum:[['Gatinho','🐱',1.5],['Cachorrinho','🐶',1.5]], incomum:[['Coelho','🐰',3]], raro:[['Raposa','🦊',7]],
         epico:[['Panda','🐼',18]], lendario:[['Dragão Bebê','🐲',50]], mitico:[['Fênix','🔥',150]],
       }},
-      { name:'Ovo Premium', emoji:'🥚', cost:5000, pets:{
-        comum:[['Peixinho','🐟',10],['Ratinho','🐭',10]],
-        incomum:[['Tartaruga','🐢',20]], raro:[['Lobo','🐺',45]],
+      { name:'Ovo Premium', emoji:'🐣', cost:5000, pets:{
+        comum:[['Peixinho','🐟',10],['Ratinho','🐭',10]], incomum:[['Tartaruga','🐢',20]], raro:[['Lobo','🐺',45]],
         epico:[['Tigre','🐯',100]], lendario:[['Unicórnio','🦄',250]], mitico:[['Grifo','🦅',700]],
       }},
-      { name:'Ovo Dourado', emoji:'🥚', cost:250000, pets:{
-        comum:[['Abelha','🐝',50],['Joaninha','🐞',50]],
-        incomum:[['Coruja','🦉',100]], raro:[['Golfinho','🐬',250]],
+      { name:'Ovo Dourado', emoji:'🌟', cost:250000, pets:{
+        comum:[['Abelha','🐝',50],['Joaninha','🐞',50]], incomum:[['Coruja','🦉',100]], raro:[['Golfinho','🐬',250]],
         epico:[['Leopardo','🐆',600]], lendario:[['T-Rex','🦖',1500]], mitico:[['Dragão Dourado','🐉',5000]],
       }},
   ]},
   { name:'Selva', emoji:'🌴', unlock:1, theme:'linear-gradient(135deg,#14532d,#166534)', eggs:[
-      { name:'Ovo Selvagem', emoji:'🥚', cost:5e6, pets:{
-        comum:[['Sapo','🐸',500],['Lagartixa','🦎',500]],
-        incomum:[['Cobra','🐍',1000]], raro:[['Gorila','🦍',2500]],
+      { name:'Ovo Selvagem', emoji:'🌿', cost:5e6, pets:{
+        comum:[['Sapo','🐸',500],['Lagartixa','🦎',500]], incomum:[['Cobra','🐍',1000]], raro:[['Gorila','🦍',2500]],
         epico:[['Elefante','🐘',6000]], lendario:[['Leão Rei','🦁',15000]], mitico:[['Serpente Alada','🐲',50000]],
       }},
-      { name:'Ovo Tribal', emoji:'🥚', cost:1e8, pets:{
-        comum:[['Papagaio','🦜',5000],['Macaco','🐒',5000]],
-        incomum:[['Zebra','🦓',10000]], raro:[['Rinoceronte','🦏',25000]],
+      { name:'Ovo Tribal', emoji:'🗿', cost:1e8, pets:{
+        comum:[['Papagaio','🦜',5000],['Macaco','🐒',5000]], incomum:[['Zebra','🦓',10000]], raro:[['Rinoceronte','🦏',25000]],
         epico:[['Tigre Branco','🐅',60000]], lendario:[['Pavão Divino','🦚',150000]], mitico:[['Deus Macaco','🐵',500000]],
       }},
-      { name:'Ovo Amazónico', emoji:'🥚', cost:2e9, pets:{
-        comum:[['Crocodilo','🐊',50000],['Preguiça','🦥',50000]],
-        incomum:[['Morcego','🦇',100000]], raro:[['Escorpião','🦂',250000]],
+      { name:'Ovo Amazónico', emoji:'🌴', cost:2e9, pets:{
+        comum:[['Crocodilo','🐊',50000],['Preguiça','🦥',50000]], incomum:[['Morcego','🦇',100000]], raro:[['Escorpião','🦂',250000]],
         epico:[['Pantera','🐆',600000]], lendario:[['Águia Real','🦅',1500000]], mitico:[['Ent Ancestral','🌳',5000000]],
       }},
   ]},
   { name:'Oceano', emoji:'🌊', unlock:3, theme:'linear-gradient(135deg,#0c4a6e,#075985)', eggs:[
-      { name:'Ovo Coral', emoji:'🥚', cost:5e10, pets:{
-        comum:[['Peixe Palhaço','🐠',500000],['Camarão','🦐',500000]],
-        incomum:[['Polvo','🐙',1000000]], raro:[['Tubarão','🦈',2500000]],
+      { name:'Ovo Coral', emoji:'🐚', cost:5e10, pets:{
+        comum:[['Peixe Palhaço','🐠',500000],['Camarão','🦐',500000]], incomum:[['Polvo','🐙',1000000]], raro:[['Tubarão','🦈',2500000]],
         epico:[['Baleia','🐋',6000000]], lendario:[['Sereia','🧜',15000000]], mitico:[['Dragão Marinho','🐉',50000000]],
       }},
-      { name:'Ovo Abissal', emoji:'🥚', cost:1e12, pets:{
-        comum:[['Lula','🦑',5000000],['Baiacu','🐡',5000000]],
-        incomum:[['Lagosta','🦞',10000000]], raro:[['Orca','🐳',25000000]],
+      { name:'Ovo Abissal', emoji:'🐙', cost:1e12, pets:{
+        comum:[['Lula','🦑',5000000],['Baiacu','🐡',5000000]], incomum:[['Lagosta','🦞',10000000]], raro:[['Orca','🐳',25000000]],
         epico:[['Enguia Elétrica','⚡',60000000]], lendario:[['Poseidon','🔱',150000000]], mitico:[['Leviatã','🐲',500000000]],
       }},
-      { name:'Ovo Atlântida', emoji:'🥚', cost:2e13, pets:{
-        comum:[['Concha Mágica','🐚',50000000],['Caranguejo','🦀',50000000]],
-        incomum:[['Tartaruga Sábia','🐢',100000000]], raro:[['Rainha do Mar','🧜‍♀️',250000000]],
+      { name:'Ovo Atlântida', emoji:'🔱', cost:2e13, pets:{
+        comum:[['Concha Mágica','🐚',50000000],['Caranguejo','🦀',50000000]], incomum:[['Tartaruga Sábia','🐢',100000000]], raro:[['Rainha do Mar','🧜‍♀️',250000000]],
         epico:[['Kraken','🦑',600000000]], lendario:[['Zeus Marinho','⚡',1500000000]], mitico:[['Deus do Oceano','🌊',5000000000]],
       }},
   ]},
   { name:'Cósmico', emoji:'🌌', unlock:6, theme:'linear-gradient(135deg,#4c1d95,#1e1b4b)', eggs:[
-      { name:'Ovo Estelar', emoji:'🥚', cost:5e14, pets:{
-        comum:[['Estrela','⭐',500000000],['Lua','🌙',500000000]],
-        incomum:[['Cometa','☄️',1000000000]], raro:[['Saturno','🪐',2500000000]],
+      { name:'Ovo Estelar', emoji:'⭐', cost:5e14, pets:{
+        comum:[['Estrela','⭐',500000000],['Lua','🌙',500000000]], incomum:[['Cometa','☄️',1000000000]], raro:[['Saturno','🪐',2500000000]],
         epico:[['Sol','🌞',6000000000]], lendario:[['Supernova','💫',15000000000]], mitico:[['Buraco Negro','🕳️',50000000000]],
       }},
-      { name:'Ovo Galáctico', emoji:'🥚', cost:1e16, pets:{
-        comum:[['Alien','👽',5000000000],['UFO','🛸',5000000000]],
-        incomum:[['Nebulosa','🌌',10000000000]], raro:[['Estrela Cadente','🌠',25000000000]],
+      { name:'Ovo Galáctico', emoji:'🌌', cost:1e16, pets:{
+        comum:[['Alien','👽',5000000000],['UFO','🛸',5000000000]], incomum:[['Nebulosa','🌌',10000000000]], raro:[['Estrela Cadente','🌠',25000000000]],
         epico:[['Quasar','🌟',60000000000]], lendario:[['Galáxia Viva','🌀',150000000000]], mitico:[['Devorador de Mundos','🌑',500000000000]],
       }},
-      { name:'Ovo Divino', emoji:'🥚', cost:2e17, pets:{
-        comum:[['Anjo','👼',50000000000],['Serafim','😇',50000000000]],
-        incomum:[['Oráculo','🔮',100000000000]], raro:[['Mago Cósmico','🧙',250000000000]],
+      { name:'Ovo Divino', emoji:'👼', cost:2e17, pets:{
+        comum:[['Anjo','👼',50000000000],['Serafim','😇',50000000000]], incomum:[['Oráculo','🔮',100000000000]], raro:[['Mago Cósmico','🧙',250000000000]],
         epico:[['Olho Cósmico','👁️',600000000000]], lendario:[['Titã','🗿',1500000000000]], mitico:[['Dragão Cósmico','🐲',5000000000000]],
+      }},
+  ]},
+  { name:'Gelo', emoji:'❄️', unlock:10, theme:'linear-gradient(135deg,#0e7490,#0369a1)', eggs:[
+      { name:'Ovo Gélido', emoji:'🧊', cost:5e18, pets:{
+        comum:[['Pinguim','🐧',100000000000],['Foca','🦭',100000000000]], incomum:[['Urso Polar','🐻‍❄️',300000000000]], raro:[['Lobo Ártico','🐺',800000000000]],
+        epico:[['Yeti','❄️',2000000000000]], lendario:[['Rainha do Gelo','👸',5000000000000]], mitico:[['Dragão de Gelo','🐉',20000000000000]],
+      }},
+      { name:'Ovo Glacial', emoji:'❄️', cost:1e20, pets:{
+        comum:[['Narval','🦄',5000000000000],['Morsa','🦭',5000000000000]], incomum:[['Raposa Ártica','🦊',15000000000000]], raro:[['Leopardo das Neves','🐆',40000000000000]],
+        epico:[['Titã do Gelo','🗿',100000000000000]], lendario:[['Deus do Inverno','⛄',250000000000000]], mitico:[['Fênix Glacial','🔥',1000000000000000]],
+      }},
+      { name:'Ovo do Vazio', emoji:'🖤', cost:5e21, pets:{
+        comum:[['Cristal','💎',50000000000000],['Floco','❄️',50000000000000]], incomum:[['Espírito','👻',150000000000000]], raro:[['Lich','💀',400000000000000]],
+        epico:[['Devorador','🕳️',1000000000000000]], lendario:[['Titã Ancestral','🗿',2500000000000000]], mitico:[['Deus Absoluto','👑',10000000000000000]],
       }},
   ]},
 ];
@@ -1315,12 +1361,13 @@ const PLAYER_NAME_KEY = 'clicker2d_name_v1';
 const NAME_CONFIRMED_KEY = 'clicker2d_name_confirmed';
 const TUTORIAL_KEY = 'clicker2d_tutorial_done';
 const LAST_SEEN_KEY = 'clicker2d_last_seen';
+const THEME_KEY = 'clicker2d_theme';
 
 /* ============ ESTADO ============ */
 let state = {
   clicks:0, totalClicks:0, rebirths:0, currentWorld:0,
   pets:[], petUid:0,
-  stats: { petsOpened: 0, petsByRarity: { comum:0,incomum:0,raro:0,epico:0,lendario:0,mitico:0 }, clicksMade: 0, playTimeMs: 0 },
+  stats: { petsOpened: 0, petsByRarity: { comum:0,incomum:0,raro:0,epico:0,lendario:0,mitico:0 }, clicksMade: 0, playTimeMs: 0, critHits: 0 },
   automation: { autoEquip:false, autoFusion:false, eggMultiplier:1, autoOpenActive:false, autoOpenTarget:null, autoOpenedCount:0 },
 };
 
@@ -1329,10 +1376,14 @@ function ensureDefaults() {
   if (typeof state.stats.petsOpened !== 'number') state.stats.petsOpened = 0;
   if (typeof state.stats.clicksMade !== 'number') state.stats.clicksMade = 0;
   if (typeof state.stats.playTimeMs !== 'number') state.stats.playTimeMs = 0;
+  if (typeof state.stats.critHits !== 'number') state.stats.critHits = 0;
   if (!state.stats.petsByRarity) state.stats.petsByRarity = {};
   RARITY_ORDER.forEach(k => { if (typeof state.stats.petsByRarity[k] !== 'number') state.stats.petsByRarity[k] = 0; });
   if (!Array.isArray(state.pets)) state.pets = [];
-  state.pets.forEach(p => { if (typeof p.fusionLevel !== 'number') p.fusionLevel = 0; });
+  state.pets.forEach(p => {
+    if (typeof p.fusionLevel !== 'number') p.fusionLevel = 0;
+    if (typeof p.pinned !== 'boolean') p.pinned = false;
+  });
   if (typeof state.currentWorld !== 'number' || state.currentWorld >= WORLDS.length) state.currentWorld = 0;
   if (typeof state.clicks !== 'number') state.clicks = 0;
   if (typeof state.totalClicks !== 'number') state.totalClicks = 0;
@@ -1378,66 +1429,144 @@ function toast(msg) {
   clearTimeout(t._timeout); t._timeout = setTimeout(() => t.classList.remove('show'), 2200);
 }
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function getDisplayName(pet) { return pet.fusionLevel ? pet.name + ' ' + '⭐'.repeat(pet.fusionLevel) : pet.name; }
+function getDisplayName(pet) {
+  if (!pet.fusionLevel) return pet.name;
+  if (pet.fusionLevel <= 3) return pet.name + ' ' + '⭐'.repeat(pet.fusionLevel);
+  return pet.name + ' ⭐×' + pet.fusionLevel;
+}
 function getDisplayMult(pet) { return pet.mult * Math.pow(FUSION_FACTOR, pet.fusionLevel || 0); }
 function getSellPrice(pet) { return Math.floor(getDisplayMult(pet) * SELL_MULT[pet.rarity]); }
 function getPetGroupKey(pet) { return pet.name + '|' + pet.emoji + '|' + (pet.fusionLevel || 0); }
+function notify(title, body) {
+  if (window.updater && window.updater.notify) {
+    window.updater.notify(title, body).catch(() => {});
+  }
+}
 
 /* ============ ÁUDIO ============ */
-let musica = null;
-let somClique = null;
-let somOvo = null;
-
+let musica = null, somClique = null, somOvo = null;
 function initAudio() {
-  musica = new Audio('musica.mp3');
-  musica.loop = true;
-  musica.volume = 0.3;
-
-  somClique = new Audio('som_clique.mp3');
-  somClique.volume = 0.5;
-
-  somOvo = new Audio('som_ovo.mp3');
-  somOvo.volume = 0.6;
-
-  // Tenta tocar música ao primeiro clique (política dos browsers)
-  const startMusicOnce = () => {
-    if (musica && musica.paused) musica.play().catch(() => {});
-    document.removeEventListener('click', startMusicOnce);
-  };
+  musica = new Audio('musica.mp3'); musica.loop = true; musica.volume = 0.3;
+  somClique = new Audio('som_clique.mp3'); somClique.volume = 0.5;
+  somOvo = new Audio('som_ovo.mp3'); somOvo.volume = 0.6;
+  const startMusicOnce = () => { if (musica && musica.paused) musica.play().catch(() => {}); document.removeEventListener('click', startMusicOnce); };
   document.addEventListener('click', startMusicOnce);
 }
+function tocarSomClique() { if (!somClique) return; try { const c = somClique.cloneNode(); c.volume = somClique.volume; c.play().catch(()=>{}); } catch(e){} }
+function tocarSomOvo() { if (!somOvo) return; try { const c = somOvo.cloneNode(); c.volume = somOvo.volume; c.play().catch(()=>{}); } catch(e){} }
 
-function tocarSomClique() {
-  if (!somClique) return;
-  // Clona para permitir cliques rápidos (o mesmo Audio não sobrepõe)
-  try {
-    const clone = somClique.cloneNode();
-    clone.volume = somClique.volume;
-    clone.play().catch(() => {});
-  } catch(e) { /* ignora */ }
+/* ============ TEMA ============ */
+function aplicarTema(id) {
+  document.body.dataset.theme = id === 'default' ? '' : id;
+  const theme = THEMES.find(t => t.id === id);
+  if (theme) document.documentElement.style.setProperty('--accent', theme.color);
+  localStorage.setItem(THEME_KEY, id);
+}
+function getTemaAtual() { return localStorage.getItem(THEME_KEY) || 'default'; }
+function podeUsarTema(theme) { return state.rebirths >= theme.req; }
+
+/* ============ EVENTOS GLOBAIS ============ */
+let globalEvents = [];
+let eventsChannel = null;
+
+function getEventMultiplier(type) {
+  let mult = 1; const now = Date.now();
+  globalEvents.forEach(ev => {
+    if (ev.event_type === type && ev.active && (!ev.ends_at || new Date(ev.ends_at).getTime() > now)) {
+      mult *= (ev.data?.multiplier || 1);
+    }
+  });
+  return mult;
+}
+function getEventDiscount(type) {
+  let pct = 0; const now = Date.now();
+  globalEvents.forEach(ev => {
+    if (ev.event_type === type && ev.active && (!ev.ends_at || new Date(ev.ends_at).getTime() > now)) {
+      pct = Math.max(pct, ev.data?.percent || 0);
+    }
+  });
+  return pct;
+}
+function getEventLuckMultiplier() { return getEventMultiplier('luck'); }
+function getEventClickMultiplier() { return getEventMultiplier('clicks'); }
+function getEggDiscount() { return getEventDiscount('egg_discount') / 100; }
+function getRebirthDiscount() { return getEventDiscount('rebirth_discount') / 100; }
+
+function fmtEventTime(ms) {
+  if (ms <= 0) return '0s';
+  const s = Math.floor(ms/1000);
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+  if (h > 0) return h+'h '+m+'m';
+  if (m > 0) return m+'m '+sec+'s';
+  return sec+'s';
 }
 
-function tocarSomOvo() {
-  if (!somOvo) return;
+function renderEventsBanner() {
+  const banner = document.getElementById('eventsBanner'); if (!banner) return;
+  const now = Date.now();
+  const active = globalEvents.filter(e => e.active && (!e.ends_at || new Date(e.ends_at).getTime() > now));
+  if (active.length === 0) { banner.style.display = 'none'; banner.classList.remove('multiple'); return; }
+  banner.style.display = 'flex';
+  banner.classList.toggle('multiple', active.length > 1);
+  const first = active[0];
+  const timeLeft = first.ends_at ? fmtEventTime(new Date(first.ends_at).getTime() - now) : '∞';
+  banner.innerHTML = '<div class="eb-emoji">' + (first.emoji || '🎉') + '</div>' +
+    '<div class="eb-info"><div class="eb-title">' + escapeHtml(first.title) + (active.length > 1 ? ' +' + (active.length-1) + ' evento(s)' : '') + '</div>' +
+    (first.description ? '<div class="eb-desc">' + escapeHtml(first.description) + '</div>' : '') + '</div>' +
+    '<div class="eb-time">⏱️ ' + timeLeft + '</div>';
+}
+
+async function loadGlobalEvents() {
+  if (!supabaseClient) return;
   try {
-    const clone = somOvo.cloneNode();
-    clone.volume = somOvo.volume;
-    clone.play().catch(() => {});
-  } catch(e) { /* ignora */ }
+    const { data, error } = await supabaseClient.from('global_events').select('*').eq('active', true).order('created_at', { ascending: false }).limit(20);
+    if (error) throw error;
+    globalEvents = data || [];
+    renderEventsBanner();
+    updateUI();
+  } catch(e) { console.warn('Erro eventos:', e); }
+}
+
+function subscribeGlobalEvents() {
+  if (!supabaseClient || eventsChannel) return;
+  try {
+    eventsChannel = supabaseClient.channel('global-events')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'global_events' }, (payload) => {
+        if (payload.eventType === 'INSERT' && payload.new && payload.new.active) {
+          toast('🎉 ' + (payload.new.emoji || '🎉') + ' ' + payload.new.title + '!');
+          notify('🎉 Evento Ativo!', (payload.new.emoji || '🎉') + ' ' + payload.new.title);
+        }
+        if (payload.eventType === 'UPDATE' && payload.old && payload.old.active && !payload.new.active) {
+          toast('⏹️ Evento terminado: ' + (payload.old.title || ''));
+        }
+        loadGlobalEvents();
+      }).subscribe();
+  } catch(e) {}
 }
 
 /* ============ LÓGICA ============ */
 function getCPC() {
   const petBonus = state.pets.filter(p => p.equipped).reduce((s,p) => s + getDisplayMult(p), 0);
-  return (1 + petBonus) * (1 + state.rebirths * 0.5);
+  const eventMult = getEventClickMultiplier();
+  return (1 + petBonus) * (1 + state.rebirths * 0.5) * eventMult;
 }
-function getRebirthCost() { return REBIRTH_BASE_COST * Math.pow(REBIRTH_MULT, state.rebirths); }
+function getRebirthCost() {
+  const base = REBIRTH_BASE_COST * Math.pow(REBIRTH_MULT, state.rebirths);
+  return Math.floor(base * (1 - getRebirthDiscount()));
+}
 function isWorldUnlocked(i) { return state.rebirths >= WORLDS[i].unlock; }
+function getEggCost(egg) { return Math.floor(egg.cost * (1 - getEggDiscount())); }
 
 function rollRarity() {
-  const total = Object.values(RARITIES).reduce((s,r) => s + r.weight, 0);
+  const luckMult = getEventLuckMultiplier();
+  const weights = {}; let total = 0;
+  RARITY_ORDER.forEach((k, i) => {
+    const base = RARITIES[k].weight;
+    const final = i >= 2 ? base * luckMult : base;
+    weights[k] = final; total += final;
+  });
   let roll = Math.random() * total;
-  for (const k of RARITY_ORDER) { roll -= RARITIES[k].weight; if (roll <= 0) return k; }
+  for (const k of RARITY_ORDER) { roll -= weights[k]; if (roll <= 0) return k; }
   return 'comum';
 }
 function pickPet(egg) {
@@ -1456,41 +1585,44 @@ function pickPet(egg) {
 
 /* ============ AÇÕES ============ */
 function doClick(evt) {
-  const gain = getCPC();
+  let gain = getCPC();
+  let isCrit = false;
+  if (Math.random() < 0.05) { gain *= 10; isCrit = true; state.stats.critHits++; }
   state.clicks += gain; state.totalClicks += gain; state.stats.clicksMade++;
   tocarSomClique();
-  spawnFloat(gain, evt);
+  spawnFloat(gain, evt, isCrit);
   updateUI(); save();
 }
-function spawnFloat(amount, evt) {
+function spawnFloat(amount, evt, isCrit) {
   const zone = document.getElementById('clickZone'); if (!zone) return;
   const r = zone.getBoundingClientRect();
   const x = evt && evt.clientX ? evt.clientX - r.left : r.width/2;
   const y = evt && evt.clientY ? evt.clientY - r.top : r.height/2;
   const el = document.createElement('div');
-  el.className = 'float-text'; el.textContent = '+' + fmt(amount);
+  el.className = 'float-text' + (isCrit ? ' crit' : '');
+  el.textContent = (isCrit ? '💥×10 ' : '') + '+' + fmt(amount);
   el.style.left = x+'px'; el.style.top = y+'px';
   zone.appendChild(el);
   setTimeout(() => el.remove(), 900);
 }
 
 function openEgg(worldIdx, eggIdx) {
+  state.automation.autoOpenTarget = { w: worldIdx, e: eggIdx };
   if (state.automation.autoOpenActive) {
-    state.automation.autoOpenTarget = { w: worldIdx, e: eggIdx };
     startAutoOpen(); updateUI(); save(); return;
   }
-  const mult = state.automation.eggMultiplier || 1;
-  openEggsBatch(worldIdx, eggIdx, mult, false);
+  openEggsBatch(worldIdx, eggIdx, state.automation.eggMultiplier || 1, false);
 }
 
 function openEggsBatch(worldIdx, eggIdx, count, silent) {
   const egg = WORLDS[worldIdx].eggs[eggIdx];
+  const finalCost = getEggCost(egg);
   const opened = [];
   for (let i = 0; i < count; i++) {
-    if (state.clicks < egg.cost) break;
-    state.clicks -= egg.cost;
+    if (state.clicks < finalCost) break;
+    state.clicks -= finalCost;
     const p = pickPet(egg);
-    const pet = { uid: ++state.petUid, name:p.name, emoji:p.emoji, mult:p.mult, rarity:p.rarity, equipped:false, fusionLevel:0 };
+    const pet = { uid: ++state.petUid, name:p.name, emoji:p.emoji, mult:p.mult, rarity:p.rarity, equipped:false, fusionLevel:0, pinned:false };
     state.pets.push(pet);
     if (state.pets.filter(x => x.equipped).length < MAX_EQUIPPED) pet.equipped = true;
     state.stats.petsOpened++;
@@ -1501,27 +1633,20 @@ function openEggsBatch(worldIdx, eggIdx, count, silent) {
     if (!silent) {
       const cards = document.querySelectorAll('.egg-card');
       if (cards[eggIdx]) { cards[eggIdx].classList.add('shake'); setTimeout(() => cards[eggIdx].classList.remove('shake'), 300); }
-      toast('Cliques insuficientes! Faltam ' + fmt(egg.cost - state.clicks));
+      toast('Cliques insuficientes! Faltam ' + fmt(finalCost - state.clicks));
     }
     return [];
   }
-  tocarSomOvo();
-  updateUI(); save();
+  tocarSomOvo(); updateUI(); save();
   if (state.automation.autoEquip) applyAutoEquip();
 
   if (silent) {
     const rare = opened.find(p => p.rarity === 'mitico') || opened.find(p => p.rarity === 'lendario');
     if (rare) {
-      const wasActive = state.automation.autoOpenActive;
-      if (wasActive) stopAutoOpen(true);
-      playEggAnimation(rare, () => {
-        if (wasActive) {
-          state.automation.autoOpenActive = true;
-          const btn = document.getElementById('autoOpenBtn');
-          if (btn) { btn.textContent = '⏸️'; btn.classList.add('active'); }
-          startAutoOpen();
-        }
-      });
+      notify('✨ ' + RARITIES[rare.rarity].name + '!', rare.emoji + ' ' + rare.name + ' (' + RARITIES[rare.rarity].name + ')');
+      toast('✨ ' + rare.emoji + ' ' + rare.name + ' (' + RARITIES[rare.rarity].name + ')!');
+      playFanfare(rare.rarity);
+      launchFireworks(RARITIES[rare.rarity].color, 1500, rare.rarity === 'mitico');
     }
     return opened;
   }
@@ -1550,6 +1675,7 @@ function playEggAnimation(pet, onDone) {
     setTimeout(() => document.body.classList.remove('screen-shake'), 400);
     if (pet.rarity === 'lendario' || pet.rarity === 'mitico') {
       launchFireworks(rarity.color, 3200, pet.rarity === 'mitico');
+      playFanfare(pet.rarity);
     }
   }, 1500);
   setTimeout(() => {
@@ -1558,11 +1684,9 @@ function playEggAnimation(pet, onDone) {
     if (onDone) onDone();
   }, 2000);
 }
-
 function burstParticles(container, color, count, minDist, maxDist) {
   for (let i = 0; i < count; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
+    const p = document.createElement('div'); p.className = 'particle';
     const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
     const dist = minDist + Math.random() * (maxDist - minDist);
     p.style.setProperty('--dx', (Math.cos(angle) * dist).toFixed(1) + 'px');
@@ -1575,7 +1699,6 @@ function burstParticles(container, color, count, minDist, maxDist) {
     container.appendChild(p); setTimeout(() => p.remove(), 1400);
   }
 }
-
 function launchFireworks(color, duration, isMitico) {
   const overlay = document.getElementById('fireworks'); if (!overlay) return;
   overlay.classList.add('show'); if (isMitico) overlay.classList.add('tint');
@@ -1607,6 +1730,39 @@ function createBurst(container, xPct, yPct, colors) {
     burst.appendChild(p);
   }
   setTimeout(() => burst.remove(), 1600);
+}
+
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null; audioCtx = new AC(); }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function playFanfare(rarity) {
+  try {
+    const ctx = getAudioCtx(); if (!ctx) return;
+    const now = ctx.currentTime; const isMitico = rarity === 'mitico';
+    const notes = isMitico ? [523.25,659.25,783.99,1046.50,1318.51,1567.98] : [392.00,523.25,659.25,783.99];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.type = isMitico ? 'sawtooth' : 'triangle'; osc.frequency.value = freq;
+      const start = now + i * (isMitico ? 0.09 : 0.12);
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(isMitico ? 0.11 : 0.09, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.65);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(start); osc.stop(start + 0.75);
+    });
+    const bass = ctx.createOscillator(), bg = ctx.createGain();
+    bass.type = 'sine';
+    bass.frequency.setValueAtTime(isMitico ? 130.81 : 98, now);
+    bass.frequency.exponentialRampToValueAtTime(isMitico ? 261.63 : 196, now + 1.2);
+    bg.gain.setValueAtTime(0, now);
+    bg.gain.linearRampToValueAtTime(0.18, now + 0.04);
+    bg.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
+    bass.connect(bg).connect(ctx.destination);
+    bass.start(now); bass.stop(now + 1.5);
+  } catch(e){}
 }
 
 function showReveal(pet) {
@@ -1678,7 +1834,7 @@ function toggleAutoFusion() {
 }
 function runAutoFusion() {
   if (!state.automation.autoFusion) return;
-  const inv = state.pets.filter(p => !p.equipped);
+  const inv = state.pets.filter(p => !p.equipped && !p.pinned);
   const groups = {};
   inv.forEach(p => { const k = getPetGroupKey(p); (groups[k] = groups[k] || []).push(p); });
   const fusible = Object.entries(groups).filter(([k,arr]) => arr.length >= 3);
@@ -1713,10 +1869,11 @@ function startAutoOpen() {
     if (!state.automation.autoOpenActive) { stopAutoOpen(); return; }
     const t = state.automation.autoOpenTarget; if (!t) { stopAutoOpen(); return; }
     const egg = WORLDS[t.w].eggs[t.e];
+    const finalCost = getEggCost(egg);
     let count = 0;
-    if (state.clicks >= egg.cost * 3) count = 3;
-    else if (state.clicks >= egg.cost * 2) count = 2;
-    else if (state.clicks >= egg.cost) count = 1;
+    if (state.clicks >= finalCost * 3) count = 3;
+    else if (state.clicks >= finalCost * 2) count = 2;
+    else if (state.clicks >= finalCost) count = 1;
     if (count === 0) { stopAutoOpen(); toast('⏹️ Auto parou: sem cliques suficientes'); return; }
     const opened = openEggsBatch(t.w, t.e, count, true);
     state.automation.autoOpenedCount += opened.length;
@@ -1736,6 +1893,12 @@ function toggleEquip(uid) {
   }
   updateUI(); save();
 }
+function togglePin(uid) {
+  const pet = state.pets.find(p => p.uid === uid); if (!pet) return;
+  pet.pinned = !pet.pinned;
+  toast(pet.pinned ? '📌 Pet fixado' : '📌 Pet desafixado');
+  updateUI(); save();
+}
 function doRebirth() {
   const cost = getRebirthCost();
   if (state.clicks < cost) { toast('❌ Precisas de ' + fmt(cost) + ' cliques. Faltam ' + fmt(cost - state.clicks) + '!'); return; }
@@ -1743,6 +1906,7 @@ function doRebirth() {
   if (!ok) return;
   state.clicks = 0; state.rebirths++;
   toast('✨ Rebirth #' + state.rebirths + ' feito!');
+  notify('🔄 Rebirth Concluído!', 'Chegaste ao Rebirth #' + state.rebirths + '!');
   updateUI(); save(); enviarPontuacao();
   launchFireworks('#a855f7', 2500, true);
 }
@@ -1752,14 +1916,17 @@ function selectWorld(i) {
 }
 function sellPet(uid, evt) {
   if (evt) evt.stopPropagation();
-  const idx = state.pets.findIndex(p => p.uid === uid); if (idx === -1) return;
-  const pet = state.pets[idx]; const price = getSellPrice(pet);
+  const pet = state.pets.find(p => p.uid === uid);
+  if (!pet) return;
+  if (pet.pinned) { toast('📌 Desafixa primeiro!'); return; }
+  const idx = state.pets.findIndex(p => p.uid === uid);
+  const price = getSellPrice(pet);
   state.pets.splice(idx, 1); state.clicks += price;
   toast('💰 Vendeste ' + getDisplayName(pet) + ' por ' + fmt(price));
   updateUI(); save();
 }
 function sellAllDuplicates() {
-  const inv = state.pets.filter(p => !p.equipped);
+  const inv = state.pets.filter(p => !p.equipped && !p.pinned);
   const groups = {};
   inv.forEach(p => { const k = getPetGroupKey(p); (groups[k] = groups[k] || []).push(p); });
   let totalMoney = 0, totalSold = 0;
@@ -1776,7 +1943,7 @@ function sellAllDuplicates() {
   updateUI(); save();
 }
 function fusePets(groupKey, silent) {
-  const inv = state.pets.filter(p => !p.equipped);
+  const inv = state.pets.filter(p => !p.equipped && !p.pinned);
   const group = inv.filter(p => getPetGroupKey(p) === groupKey);
   if (group.length < 3) { if (!silent) toast('Precisas de 3 cópias iguais!'); return; }
   group.sort((a,b) => a.uid - b.uid);
@@ -1784,7 +1951,7 @@ function fusePets(groupKey, silent) {
   const usedUids = new Set(used.map(p => p.uid));
   const base = used[0]; const newLevel = (base.fusionLevel || 0) + 1;
   state.pets = state.pets.filter(p => !usedUids.has(p.uid));
-  const fused = { uid: ++state.petUid, name: base.name, emoji: base.emoji, mult: base.mult, rarity: base.rarity, equipped: false, fusionLevel: newLevel };
+  const fused = { uid: ++state.petUid, name: base.name, emoji: base.emoji, mult: base.mult, rarity: base.rarity, equipped: false, fusionLevel: newLevel, pinned: false };
   state.pets.push(fused);
   if (!silent) toast('🧬 ' + getDisplayName(fused) + ' criado!');
   updateUI(); save();
@@ -1792,6 +1959,9 @@ function fusePets(groupKey, silent) {
 }
 
 /* ============ RENDER ============ */
+let invFilter = 'all';
+let invSearch = '';
+
 function updateUI() {
   document.getElementById('uiClicks').textContent = fmt(state.clicks);
   document.getElementById('uiCpc').textContent = fmtMult(getCPC());
@@ -1818,18 +1988,26 @@ function updateUI() {
 
   const eggList = document.getElementById('eggList'); eggList.innerHTML = '';
   const target = state.automation.autoOpenTarget;
+  const discount = getEggDiscount();
   cw.eggs.forEach((egg, i) => {
-    const ok = state.clicks >= egg.cost;
+    const finalCost = getEggCost(egg);
+    const ok = state.clicks >= finalCost;
     const isTarget = target && target.w === state.currentWorld && target.e === i;
     const card = document.createElement('div');
     card.className = 'egg-card' + (ok ? '' : ' cant-afford') + (isTarget ? ' auto-target' : '');
+    card.dataset.egg = i;
+    card.dataset.world = state.currentWorld;
+    let costHtml = '<div class="egg-cost">💰 ' + fmt(finalCost) + '</div>';
+    if (discount > 0) {
+      costHtml += '<div class="egg-discount">' + fmt(egg.cost) + ' (-' + Math.round(discount*100) + '%)</div>';
+    }
     card.innerHTML = '<span class="egg-emoji">' + egg.emoji + '</span>' +
-      '<div class="egg-name">' + egg.name + '</div>' +
-      '<div class="egg-cost">💰 ' + fmt(egg.cost) + '</div>';
+      '<div class="egg-name">' + egg.name + '</div>' + costHtml;
     card.onclick = () => openEgg(state.currentWorld, i);
     eggList.appendChild(card);
   });
 
+  // EQUIPADOS
   const eq = state.pets.filter(p => p.equipped);
   document.getElementById('equipCount').textContent = eq.length;
   const slots = document.getElementById('equippedSlots'); slots.innerHTML = '';
@@ -1838,7 +2016,8 @@ function updateUI() {
     if (i < eq.length) {
       const p = eq[i]; const r = RARITIES[p.rarity];
       slot.className = 'equip-slot filled';
-      slot.style.borderColor = r.color; slot.style.boxShadow = 'inset 0 0 12px ' + r.glow;
+      slot.dataset.rarity = p.rarity;
+      slot.style.borderColor = r.color;
       slot.innerHTML = '<div>' + p.emoji + '</div>' +
         '<div class="p-name" style="color:' + r.color + '">' + getDisplayName(p) + '</div>' +
         '<div class="p-mult">+' + fmtMult(getDisplayMult(p)) + '</div>';
@@ -1847,43 +2026,117 @@ function updateUI() {
     slots.appendChild(slot);
   }
 
-  const inv = state.pets.filter(p => !p.equipped);
-  document.getElementById('invCount').textContent = inv.length;
-  const dupGroups = {};
-  inv.forEach(p => { const k = getPetGroupKey(p); dupGroups[k] = (dupGroups[k] || 0) + 1; });
-  const hasDupes = Object.values(dupGroups).some(c => c >= 2);
-  document.getElementById('sellDupesBtn').style.display = hasDupes ? 'block' : 'none';
+  // Contador no botão de abrir inventário
+  const invCountBtn = document.getElementById('invCountBtn');
+  if (invCountBtn) invCountBtn.textContent = state.pets.length;
 
-  const invList = document.getElementById('inventoryList'); invList.innerHTML = '';
-  if (!inv.length) {
-    invList.innerHTML = '<div class="empty-msg">Sem pets no inventário.<br>Abre ovos para conseguires pets!</div>';
-  } else {
-    const rOrder = {}; RARITY_ORDER.forEach((k,i) => rOrder[k] = i);
-    inv.sort((a,b) => {
-      const ro = rOrder[a.rarity] - rOrder[b.rarity];
-      if (ro) return ro;
-      return getDisplayMult(b) - getDisplayMult(a);
-    });
-    inv.forEach(p => {
-      const r = RARITIES[p.rarity]; const price = getSellPrice(p);
-      const item = document.createElement('div');
-      item.className = 'pet-item'; item.style.borderLeftColor = r.color;
-      item.innerHTML = '<span class="pi-emoji">' + p.emoji + '</span>' +
-        '<div class="pi-info"><div class="pi-name">' + getDisplayName(p) + '</div>' +
-        '<div class="pi-rarity" style="color:' + r.color + '">' + r.name + '</div></div>' +
-        '<div class="pi-mult">+' + fmtMult(getDisplayMult(p)) + '</div>';
-      const giftBtn = document.createElement('button');
-      giftBtn.className = 'pi-gift'; giftBtn.textContent = '🎁'; giftBtn.title = 'Oferecer';
-      giftBtn.onclick = (e) => { e.stopPropagation(); openSendGift(p.uid); };
-      item.appendChild(giftBtn);
-      const sellBtn = document.createElement('button');
-      sellBtn.className = 'pi-sell'; sellBtn.textContent = '💰'; sellBtn.title = 'Vender por ' + fmt(price);
-      sellBtn.onclick = (e) => { e.stopPropagation(); sellPet(p.uid, e); };
-      item.appendChild(sellBtn);
-      item.onclick = () => toggleEquip(p.uid);
-      invList.appendChild(item);
-    });
+  // Se o modal do inventário estiver aberto, re-renderiza
+  const invModal = document.getElementById('inventoryModal');
+  if (invModal && invModal.classList.contains('show')) {
+    renderInventory();
   }
+}
+
+/* ============ INVENTÁRIO MODAL ============ */
+function openInventory() {
+  document.getElementById('inventoryModal').classList.add('show');
+  renderInventory();
+}
+function closeInventory() {
+  const m = document.getElementById('inventoryModal');
+  if (m) m.classList.remove('show');
+}
+
+function renderInventory() {
+  const grid = document.getElementById('invPetsGrid');
+  const badge = document.getElementById('invCountBadge');
+  if (!grid) return;
+
+  const allPets = [...state.pets];
+  const total = allPets.length;
+
+  let filtered = allPets;
+  if (invFilter === 'equipped') filtered = filtered.filter(p => p.equipped);
+  else if (invFilter === 'pinned') filtered = filtered.filter(p => p.pinned);
+  else if (invFilter !== 'all') filtered = filtered.filter(p => p.rarity === invFilter);
+
+  if (invSearch) {
+    const q = invSearch.toLowerCase();
+    filtered = filtered.filter(p => p.name.toLowerCase().includes(q));
+  }
+
+  badge.textContent = filtered.length + ' / ' + total + ' pets';
+
+  const rOrder = {}; RARITY_ORDER.forEach((k,i) => rOrder[k] = i);
+  filtered.sort((a,b) => {
+    if (a.pinned !== b.pinned) return b.pinned - a.pinned;
+    if (a.equipped !== b.equipped) return b.equipped - a.equipped;
+    const ro = rOrder[b.rarity] - rOrder[a.rarity];
+    if (ro) return ro;
+    return getDisplayMult(b) - getDisplayMult(a);
+  });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="inv-empty">' +
+      (total === 0 ? 'Sem pets no inventário.<br>Abre ovos para conseguires pets! 🥚' : 'Nenhum pet corresponde ao filtro.') +
+      '</div>';
+    return;
+  }
+
+  grid.innerHTML = '';
+  filtered.forEach(p => {
+    const r = RARITIES[p.rarity];
+    const price = getSellPrice(p);
+    const card = document.createElement('div');
+    card.className = 'inv-pet-card' + (p.equipped ? ' equipped' : '') + (p.pinned ? ' pinned' : '');
+
+    const stars = p.fusionLevel ? (p.fusionLevel <= 3 ? ' ' + '⭐'.repeat(p.fusionLevel) : ' ⭐×' + p.fusionLevel) : '';
+
+    card.innerHTML =
+      (p.equipped ? '<div class="pc-badge">⚔️</div>' : '') +
+      (p.pinned ? '<div class="pc-pin-badge">📌</div>' : '') +
+      '<div class="pc-emoji">' + p.emoji + '</div>' +
+      '<div class="pc-name" style="color:' + r.color + '">' + escapeHtml(p.name) + stars + '</div>' +
+      '<div class="pc-rarity" style="color:' + r.color + '">' + r.name + '</div>' +
+      '<div class="pc-mult">+' + fmtMult(getDisplayMult(p)) + '</div>' +
+      '<div class="pc-actions">' +
+        '<button class="pc-btn ' + (p.equipped ? 'pc-unequip' : 'pc-equip') + '" title="' + (p.equipped ? 'Desequipar' : 'Equipar') + '">' + (p.equipped ? '✕' : '⚔️') + '</button>' +
+        '<button class="pc-btn pc-gift" title="Oferecer" ' + ((p.equipped || p.pinned) ? 'disabled' : '') + '>🎁</button>' +
+        '<button class="pc-btn pc-pin ' + (p.pinned ? 'active' : '') + '" title="Fixar">📌</button>' +
+        '<button class="pc-btn pc-sell" title="Vender por ' + fmt(price) + '" ' + (p.pinned ? 'disabled' : '') + '>💰</button>' +
+      '</div>' +
+      '<div class="pc-rarity-bar" style="background:' + r.color + '"></div>';
+
+    card.querySelector('.pc-equip, .pc-unequip').onclick = (e) => {
+      e.stopPropagation();
+      toggleEquip(p.uid);
+      renderInventory();
+    };
+    card.querySelector('.pc-gift').onclick = (e) => {
+      e.stopPropagation();
+      closeInventory();
+      openSendGift(p.uid);
+    };
+    card.querySelector('.pc-pin').onclick = (e) => {
+      e.stopPropagation();
+      togglePin(p.uid);
+      renderInventory();
+    };
+    card.querySelector('.pc-sell').onclick = (e) => {
+      e.stopPropagation();
+      if (p.pinned) { toast('📌 Desafixa primeiro!'); return; }
+      if (!confirm('Vender ' + p.emoji + ' ' + getDisplayName(p) + ' por ' + fmt(price) + '?')) return;
+      sellPet(p.uid);
+      renderInventory();
+    };
+
+    grid.appendChild(card);
+  });
+}
+
+function sellAllDuplicatesFromModal() {
+  sellAllDuplicates();
+  renderInventory();
 }
 
 /* ============ COLEÇÃO ============ */
@@ -1949,9 +2202,9 @@ function closeFusion() { const m = document.getElementById('fusionModal'); if (m
 function renderFusion() {
   const body = document.getElementById('fusionBody'); body.innerHTML = '';
   const info = document.createElement('div'); info.className = 'fusion-info-box';
-  info.innerHTML = '🧬 Junta <b>3 pets iguais</b> → pet ×' + FUSION_FACTOR + ' mais forte. Só pets no inventário contam.';
+  info.innerHTML = '🧬 Junta <b>3 pets iguais</b> → pet ×' + FUSION_FACTOR + ' mais forte. Só pets no inventário não fixados contam.';
   body.appendChild(info);
-  const inv = state.pets.filter(p => !p.equipped); const groups = {};
+  const inv = state.pets.filter(p => !p.equipped && !p.pinned); const groups = {};
   inv.forEach(p => { const k = getPetGroupKey(p); if (!groups[k]) groups[k] = []; groups[k].push(p); });
   const fusible = Object.entries(groups).filter(([k, arr]) => arr.length >= 3);
   if (fusible.length === 0) {
@@ -1985,7 +2238,7 @@ function openStats() {
     { ico:'🥚', label:'Ovos abertos', val: fmt(state.stats.petsOpened) },
     { ico:'🔄', label:'Rebirths', val: fmt(state.rebirths) },
     { ico:'⏱️', label:'Tempo de jogo', val: fmtTime(state.stats.playTimeMs) },
-    { ico:'🐾', label:'Pets ativos', val: state.pets.filter(p => p.equipped).length + '/' + MAX_EQUIPPED },
+    { ico:'💥', label:'Critical Hits', val: fmt(state.stats.critHits || 0) },
     { ico:'🎒', label:'Inventário', val: fmt(state.pets.filter(p => !p.equipped).length) },
     { ico:'📈', label:'Cliques/clique', val: fmtMult(getCPC()) },
   ];
@@ -2052,7 +2305,7 @@ function saveName() {
   closeNameModal(); toast('✅ Nome guardado: ' + novo);
   if (antigo !== novo) { enviarPontuacao(); submitWeeklyScore(); }
   const rm = document.getElementById('rankModal'); if (rm && rm.classList.contains('show')) renderRankSupabase();
-  updateGiftsBadge(); subscribeChat();
+  updateGiftsBadge(); updateFriendsBadge(); updatePMBadge(); subscribeChat(); subscribeFriends(); subscribePM();
 }
 
 /* ============ RANKING ============ */
@@ -2062,7 +2315,10 @@ async function enviarPontuacao() {
   const nome = getUserName(); const score = getUserScore();
   try {
     const { data: existente } = await supabaseClient.from('leaderboard').select('id, score').eq('player', nome).maybeSingle();
-    if (existente) { if (score > existente.score) await supabaseClient.from('leaderboard').update({ score, rebirths: state.rebirths, updated_at: new Date().toISOString() }).eq('id', existente.id); }
+    if (existente) {
+      if (score > existente.score) await supabaseClient.from('leaderboard').update({ score, rebirths: state.rebirths, last_seen: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', existente.id);
+      else await supabaseClient.from('leaderboard').update({ last_seen: new Date().toISOString() }).eq('id', existente.id);
+    }
     else await supabaseClient.from('leaderboard').insert({ player: nome, score, rebirths: state.rebirths });
   } catch(e) {}
 }
@@ -2160,8 +2416,21 @@ let chatChannel = null;
 function fmtChatTime(iso) { try { const d = new Date(iso); return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0'); } catch(e){ return ''; } }
 function makeChatEl(msg, isYou) {
   const el = document.createElement('div'); el.className = 'chat-msg' + (isYou ? ' you' : '');
-  el.innerHTML = '<div class="cm-header"><span class="cm-name">' + escapeHtml(msg.player) + '</span><span class="cm-time">' + fmtChatTime(msg.created_at) + '</span></div>' +
+  el.innerHTML = '<div class="cm-header"><span class="cm-name">' + escapeHtml(msg.player) + '</span>' +
+    '<span class="cm-time">' + fmtChatTime(msg.created_at) + (isYou ? '<button class="cm-delete" title="Apagar">🗑️</button>' : '') + '</span></div>' +
     '<div class="cm-text">' + escapeHtml(msg.message) + '</div>';
+  if (isYou && msg.id) {
+    const deleteBtn = el.querySelector('.cm-delete');
+    if (deleteBtn) {
+      deleteBtn.onclick = async (e) => {
+        e.stopPropagation();
+        if (!confirm('Apagar esta mensagem?')) return;
+        const { error } = await supabaseClient.from('chat_messages').delete().eq('id', msg.id);
+        if (error) { toast('❌ ' + error.message); return; }
+        el.remove(); toast('🗑️ Apagada');
+      };
+    }
+  }
   return el;
 }
 function appendChatMessage(msg) {
@@ -2196,7 +2465,8 @@ function subscribeChat() {
   try {
     chatChannel = supabaseClient.channel('chat-global')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, (payload) => {
-        const modal = document.getElementById('chatModal'); if (modal && modal.classList.contains('show')) appendChatMessage(payload.new);
+        const modal = document.getElementById('chatModal');
+        if (modal && modal.classList.contains('show')) appendChatMessage(payload.new);
       }).subscribe();
   } catch(e) {}
 }
@@ -2207,7 +2477,7 @@ async function openChat() {
 }
 function closeChat() { const m = document.getElementById('chatModal'); if (m) m.classList.remove('show'); }
 
-/* ============ PRESENTES ============ */
+/* ============ PRESENTES DE PETS ============ */
 let currentGiftPetUid = null;
 async function updateGiftsBadge() {
   if (!supabaseClient) return; if (!localStorage.getItem(NAME_CONFIRMED_KEY)) return;
@@ -2233,11 +2503,11 @@ async function renderGifts() {
     data.forEach(g => {
       const r = RARITIES[g.pet_rarity] || RARITIES.comum;
       const item = document.createElement('div'); item.className = 'gift-item'; item.style.borderLeftColor = r.color;
-      const stars = g.fusion_level ? ' ' + '⭐'.repeat(g.fusion_level) : '';
+      const stars = g.fusion_level ? ' ' + '⭐'.repeat(Math.min(g.fusion_level, 3)) : '';
       item.innerHTML = '<div class="gift-pet-emoji">' + g.pet_emoji + '</div>' +
         '<div class="gift-info"><div class="gift-from">De: ' + escapeHtml(g.from_player) + '</div>' +
         '<div class="gift-pet-name" style="color:' + r.color + '">' + escapeHtml(g.pet_name) + stars + '</div>' +
-        '<div class="gift-rarity" style="color:' + r.color + '">' + r.name + ' · +' + fmtMult(g.pet_mult * Math.pow(FUSION_FACTOR, g.fusion_level || 0)) + '/clique</div></div>' +
+        '<div class="gift-rarity" style="color:' + r.color + '">' + r.name + '</div></div>' +
         '<div class="gift-actions"><button class="gift-action-btn gift-accept" data-action="accept" data-id="' + g.id + '">✅</button>' +
         '<button class="gift-action-btn gift-reject" data-action="reject" data-id="' + g.id + '">✕</button></div>';
       body.appendChild(item);
@@ -2255,7 +2525,7 @@ async function acceptGift(gift) {
   try {
     const { error } = await supabaseClient.from('pet_gifts').update({ status: 'accepted' }).eq('id', gift.id);
     if (error) { toast('❌ ' + error.message); return; }
-    state.pets.push({ uid: ++state.petUid, name: gift.pet_name, emoji: gift.pet_emoji, mult: gift.pet_mult, rarity: gift.pet_rarity, equipped: false, fusionLevel: gift.fusion_level || 0 });
+    state.pets.push({ uid: ++state.petUid, name: gift.pet_name, emoji: gift.pet_emoji, mult: gift.pet_mult, rarity: gift.pet_rarity, equipped: false, fusionLevel: gift.fusion_level || 0, pinned: false });
     updateUI(); save(); toast('🎁 Recebeste ' + gift.pet_emoji + ' ' + gift.pet_name + '!');
     await renderGifts(); await updateGiftsBadge();
   } catch(e) {}
@@ -2270,8 +2540,9 @@ function openSendGift(uid) {
   if (!localStorage.getItem(NAME_CONFIRMED_KEY)) { openNameModal(true); return; }
   const pet = state.pets.find(p => p.uid === uid); if (!pet) return;
   if (pet.equipped) { toast('⚠️ Desequipa o pet primeiro!'); return; }
+  if (pet.pinned) { toast('📌 Desafixa o pet primeiro!'); return; }
   currentGiftPetUid = uid;
-  const preview = document.getElementById('sendGiftPetPreview'); const r = RARITIES[pet.rarity]; const stars = pet.fusionLevel ? ' ' + '⭐'.repeat(pet.fusionLevel) : '';
+  const preview = document.getElementById('sendGiftPetPreview'); const r = RARITIES[pet.rarity]; const stars = pet.fusionLevel ? ' ' + '⭐'.repeat(Math.min(pet.fusionLevel, 3)) : '';
   preview.innerHTML = '<div class="sgp-emoji">' + pet.emoji + '</div>' +
     '<div class="sgp-info"><div class="sgp-name" style="color:' + r.color + '">' + escapeHtml(pet.name) + stars + '</div>' +
     '<div class="sgp-meta">' + r.name + ' · +' + fmtMult(getDisplayMult(pet)) + '/clique</div></div>';
@@ -2290,6 +2561,487 @@ async function confirmSendGift() {
     if (error) { toast('❌ ' + error.message); return; }
     state.pets = state.pets.filter(p => p.uid !== currentGiftPetUid); updateUI(); save(); closeSendGift(); toast('🎁 Enviado para ' + to + '!');
   } catch(e) { toast('❌ Erro'); }
+}
+
+/* ============ AMIGOS ============ */
+let friendsChannel = null;
+let friendTabAtual = 'list';
+
+async function updateFriendsBadge() {
+  if (!supabaseClient) return; if (!localStorage.getItem(NAME_CONFIRMED_KEY)) return;
+  try {
+    const { data } = await supabaseClient.from('friend_requests').select('id').eq('to_player', getUserName()).eq('status', 'pending');
+    const badge = document.getElementById('friendsBadge'); const count = (data || []).length;
+    if (badge) { if (count > 0) { badge.textContent = count; badge.style.display = 'inline-flex'; } else badge.style.display = 'none'; }
+  } catch(e) {}
+}
+
+async function openFriends() {
+  document.getElementById('friendsModal').classList.add('show');
+  if (!localStorage.getItem(NAME_CONFIRMED_KEY)) { openNameModal(true); return; }
+  await renderFriends();
+}
+function closeFriends() { const m = document.getElementById('friendsModal'); if (m) m.classList.remove('show'); }
+function switchFriendTab(tab) {
+  friendTabAtual = tab;
+  document.getElementById('friendTabList').classList.toggle('active', tab === 'list');
+  document.getElementById('friendTabRequests').classList.toggle('active', tab === 'requests');
+  document.getElementById('friendTabAdd').classList.toggle('active', tab === 'add');
+  renderFriends();
+}
+
+async function renderFriends() {
+  const body = document.getElementById('friendsBody');
+  const userName = getUserName();
+  body.innerHTML = '<div class="rank-loading">⏳ A carregar...</div>';
+
+  if (friendTabAtual === 'list') {
+    try {
+      const { data: fs } = await supabaseClient.from('friendships').select('*').or('player1.eq.' + userName + ',player2.eq.' + userName);
+      const friendNames = (fs || []).map(f => f.player1 === userName ? f.player2 : f.player1);
+      document.getElementById('friendCount').textContent = friendNames.length;
+
+      if (friendNames.length === 0) {
+        body.innerHTML = '<div class="empty-msg-big">Ainda não tens amigos.<br>Vai a "➕ Adicionar" para convidar alguém!</div>';
+        return;
+      }
+
+      const { data: leaders } = await supabaseClient.from('leaderboard').select('player, score, rebirths, last_seen').in('player', friendNames);
+      const leaderMap = {};
+      (leaders || []).forEach(l => leaderMap[l.player] = l);
+
+      body.innerHTML = '';
+      friendNames.forEach(name => {
+        const l = leaderMap[name] || {};
+        const isOnline = l.last_seen && (Date.now() - new Date(l.last_seen).getTime() < 5 * 60 * 1000);
+        const row = document.createElement('div');
+        row.className = 'friend-row';
+        row.innerHTML = '<div class="friend-avatar">' + (isOnline ? '🟢' : '⚫') + '</div>' +
+          '<div class="friend-info">' +
+            '<div class="friend-name">' + escapeHtml(name) + '</div>' +
+            '<div class="friend-meta"><span class="friend-status ' + (isOnline ? 'online' : 'offline') + '"></span>' + (isOnline ? 'Online' : 'Offline') + ' · ' + fmt(l.score || 0) + ' pts · 🔄 ' + (l.rebirths || 0) + '</div>' +
+          '</div>' +
+          '<div class="friend-actions">' +
+            '<button class="friend-btn" data-action="pm" data-name="' + escapeHtml(name) + '" title="Mensagem">💌</button>' +
+            '<button class="friend-btn" data-action="clicks" data-name="' + escapeHtml(name) + '" title="Enviar cliques">💰</button>' +
+            '<button class="friend-btn danger" data-action="remove" data-name="' + escapeHtml(name) + '" title="Remover">✕</button>' +
+          '</div>';
+        body.appendChild(row);
+      });
+
+      body.querySelectorAll('button[data-action]').forEach(btn => {
+        btn.onclick = () => {
+          const action = btn.getAttribute('data-action');
+          const name = btn.getAttribute('data-name');
+          if (action === 'pm') openPMWith(name);
+          else if (action === 'clicks') openSendClicks(name);
+          else if (action === 'remove') removeFriend(name);
+        };
+      });
+    } catch(e) { body.innerHTML = '<div class="empty-msg-big">Erro ao carregar.</div>'; }
+  }
+
+  else if (friendTabAtual === 'requests') {
+    try {
+      const { data: recebidos } = await supabaseClient.from('friend_requests').select('*').eq('to_player', userName).eq('status', 'pending');
+      const { data: enviados } = await supabaseClient.from('friend_requests').select('*').eq('from_player', userName).eq('status', 'pending');
+
+      document.getElementById('requestCount').textContent = (recebidos || []).length;
+
+      body.innerHTML = '';
+      if ((recebidos || []).length === 0 && (enviados || []).length === 0) {
+        body.innerHTML = '<div class="empty-msg-big">Sem pedidos de amizade.</div>';
+        return;
+      }
+
+      if ((recebidos || []).length > 0) {
+        const h = document.createElement('h3');
+        h.style.cssText = 'font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim);margin:14px 0 8px;font-weight:700;';
+        h.textContent = '📥 Pedidos Recebidos';
+        body.appendChild(h);
+        recebidos.forEach(r => {
+          const row = document.createElement('div');
+          row.className = 'friend-row';
+          row.innerHTML = '<div class="friend-avatar">👤</div>' +
+            '<div class="friend-info"><div class="friend-name">' + escapeHtml(r.from_player) + '</div>' +
+            '<div class="friend-meta">Quer ser teu amigo</div></div>' +
+            '<div class="friend-actions">' +
+              '<button class="friend-btn accept" data-action="accept" data-id="' + r.id + '" data-from="' + escapeHtml(r.from_player) + '">✓ Aceitar</button>' +
+              '<button class="friend-btn danger" data-action="reject" data-id="' + r.id + '">✕</button>' +
+            '</div>';
+          body.appendChild(row);
+        });
+      }
+
+      if ((enviados || []).length > 0) {
+        const h = document.createElement('h3');
+        h.style.cssText = 'font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-dim);margin:14px 0 8px;font-weight:700;';
+        h.textContent = '📤 Pedidos Enviados';
+        body.appendChild(h);
+        enviados.forEach(r => {
+          const row = document.createElement('div');
+          row.className = 'friend-row';
+          row.innerHTML = '<div class="friend-avatar">👤</div>' +
+            '<div class="friend-info"><div class="friend-name">' + escapeHtml(r.to_player) + '</div>' +
+            '<div class="friend-meta">Aguardando resposta...</div></div>' +
+            '<div class="friend-actions"><button class="friend-btn danger" data-action="cancel" data-id="' + r.id + '">Cancelar</button></div>';
+          body.appendChild(row);
+        });
+      }
+
+      body.querySelectorAll('button[data-action]').forEach(btn => {
+        btn.onclick = () => {
+          const action = btn.getAttribute('data-action');
+          const id = parseInt(btn.getAttribute('data-id'));
+          if (action === 'accept') acceptFriendRequest(id, btn.getAttribute('data-from'));
+          else if (action === 'reject') rejectFriendRequest(id);
+          else if (action === 'cancel') cancelFriendRequest(id);
+        };
+      });
+    } catch(e) { body.innerHTML = '<div class="empty-msg-big">Erro.</div>'; }
+  }
+
+  else if (friendTabAtual === 'add') {
+    body.innerHTML = '<div style="padding:14px;background:rgba(236,72,153,.08);border:1px solid rgba(236,72,153,.3);border-radius:10px;margin-bottom:14px;">' +
+      '<p style="font-size:12px;color:var(--text-dim);margin-bottom:10px;">Escreve o nome de outro jogador para enviar um pedido de amizade.</p>' +
+      '<input type="text" class="name-input" id="addFriendInput" maxlength="16" placeholder="Nome do jogador..." style="margin-bottom:10px;">' +
+      '<button class="name-confirm" style="width:100%;padding:12px;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#ec4899,#db2777);color:#fff;border:none;" id="addFriendBtn">📨 Enviar Pedido</button>' +
+    '</div>';
+    document.getElementById('addFriendBtn').onclick = addFriend;
+    document.getElementById('addFriendInput').addEventListener('keydown', e => { if (e.key === 'Enter') addFriend(); });
+  }
+}
+
+async function addFriend() {
+  const input = document.getElementById('addFriendInput');
+  const name = (input.value || '').trim().slice(0, 16);
+  if (!name) { toast('❌ Escreve um nome'); return; }
+  if (name === getUserName()) { toast('❌ Não podes adicionar-te!'); return; }
+
+  const me = getUserName();
+  const { data: fs } = await supabaseClient.from('friendships').select('*')
+    .or('and(player1.eq.' + me + ',player2.eq.' + name + '),and(player1.eq.' + name + ',player2.eq.' + me + ')').maybeSingle();
+  if (fs) { toast('❌ Já são amigos!'); return; }
+
+  const { data: req } = await supabaseClient.from('friend_requests').select('*').eq('from_player', me).eq('to_player', name).eq('status', 'pending').maybeSingle();
+  if (req) { toast('⏳ Pedido já enviado'); return; }
+
+  try {
+    const { error } = await supabaseClient.from('friend_requests').insert({
+      from_player: me, to_player: name, status: 'pending'
+    });
+    if (error) { toast('❌ ' + error.message); return; }
+    toast('📨 Pedido enviado para ' + name);
+    input.value = '';
+    switchFriendTab('requests');
+  } catch(e) { toast('❌ Erro'); }
+}
+
+async function acceptFriendRequest(id, from) {
+  try {
+    await supabaseClient.from('friend_requests').update({ status: 'accepted' }).eq('id', id);
+    const me = getUserName();
+    const p1 = me < from ? me : from;
+    const p2 = me < from ? from : me;
+    await supabaseClient.from('friendships').insert({ player1: p1, player2: p2 });
+    toast('✅ ' + from + ' agora é teu amigo!');
+    notify('👥 Novo Amigo!', from + ' aceitou o teu pedido.');
+    await renderFriends(); await updateFriendsBadge();
+  } catch(e) { toast('❌ Erro'); }
+}
+
+async function rejectFriendRequest(id) {
+  try {
+    await supabaseClient.from('friend_requests').update({ status: 'rejected' }).eq('id', id);
+    toast('✕ Pedido recusado');
+    await renderFriends(); await updateFriendsBadge();
+  } catch(e) {}
+}
+
+async function cancelFriendRequest(id) {
+  try {
+    await supabaseClient.from('friend_requests').delete().eq('id', id);
+    toast('✕ Pedido cancelado');
+    await renderFriends();
+  } catch(e) {}
+}
+
+async function removeFriend(name) {
+  if (!confirm('Remover ' + name + ' dos amigos?')) return;
+  const me = getUserName();
+  const p1 = me < name ? me : name;
+  const p2 = me < name ? name : me;
+  try {
+    await supabaseClient.from('friendships').delete().eq('player1', p1).eq('player2', p2);
+    await supabaseClient.from('friend_requests').delete().or('and(from_player.eq.' + me + ',to_player.eq.' + name + '),and(from_player.eq.' + name + ',to_player.eq.' + me + ')');
+    toast('✕ ' + name + ' removido');
+    await renderFriends();
+  } catch(e) { toast('❌ Erro'); }
+}
+
+function subscribeFriends() {
+  if (!supabaseClient || friendsChannel) return;
+  try {
+    friendsChannel = supabaseClient.channel('friends-updates')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'friend_requests' }, (payload) => {
+        if (payload.new && payload.new.to_player === getUserName()) {
+          toast('👥 Novo pedido de amizade de ' + payload.new.from_player + '!');
+          notify('👥 Pedido de Amizade', payload.new.from_player + ' quer ser teu amigo!');
+          updateFriendsBadge();
+        }
+      }).subscribe();
+  } catch(e) {}
+}
+
+/* ============ ENVIAR CLIQUES ============ */
+let sendClicksTo = null;
+function openSendClicks(toName) {
+  sendClicksTo = toName;
+  document.getElementById('sendClicksTo').innerHTML = 'Enviar para: <b style="color:var(--gold)">' + escapeHtml(toName) + '</b>';
+  document.getElementById('sendClicksAmount').value = '';
+  document.getElementById('sendClicksAmount').max = Math.floor(state.clicks);
+  document.getElementById('sendClicksModal').classList.add('show');
+  setTimeout(() => document.getElementById('sendClicksAmount').focus(), 100);
+}
+function closeSendClicks() {
+  document.getElementById('sendClicksModal').classList.remove('show');
+  sendClicksTo = null;
+}
+async function confirmSendClicks() {
+  if (!sendClicksTo) return;
+  const amountInput = document.getElementById('sendClicksAmount');
+  const amount = Math.floor(parseFloat(amountInput.value) || 0);
+  if (amount <= 0) { toast('❌ Quantidade inválida'); return; }
+  if (amount > state.clicks) { toast('❌ Não tens cliques suficientes'); return; }
+  try {
+    const { error } = await supabaseClient.from('click_gifts').insert({
+      from_player: getUserName(), to_player: sendClicksTo, amount, status: 'pending'
+    });
+    if (error) { toast('❌ ' + error.message); return; }
+    state.clicks -= amount;
+    updateUI(); save();
+    closeSendClicks();
+    toast('💰 Enviados ' + fmt(amount) + ' cliques para ' + sendClicksTo + '!');
+  } catch(e) { toast('❌ Erro'); }
+}
+
+async function checkClickGifts() {
+  if (!supabaseClient) return; if (!localStorage.getItem(NAME_CONFIRMED_KEY)) return;
+  try {
+    const { data } = await supabaseClient.from('click_gifts').select('*').eq('to_player', getUserName()).eq('status', 'pending');
+    if (!data || data.length === 0) return;
+    for (const gift of data) {
+      state.clicks += gift.amount;
+      state.totalClicks += gift.amount;
+      await supabaseClient.from('click_gifts').update({ status: 'accepted' }).eq('id', gift.id);
+      toast('💰 Recebeste ' + fmt(gift.amount) + ' cliques de ' + gift.from_player + '!');
+      notify('💰 Cliques Recebidos!', gift.from_player + ' enviou-te ' + fmt(gift.amount) + ' cliques!');
+    }
+    updateUI(); save();
+  } catch(e) {}
+}
+
+/* ============ MENSAGENS PRIVADAS ============ */
+let pmChannel = null;
+let pmCurrentFriend = null;
+let pmViewingConversation = false;
+
+async function updatePMBadge() {
+  if (!supabaseClient) return; if (!localStorage.getItem(NAME_CONFIRMED_KEY)) return;
+  try {
+    const { data } = await supabaseClient.from('private_messages').select('id').eq('to_player', getUserName()).eq('is_read', false);
+    const badge = document.getElementById('pmBadge'); const count = (data || []).length;
+    if (badge) { if (count > 0) { badge.textContent = count; badge.style.display = 'inline-flex'; } else badge.style.display = 'none'; }
+  } catch(e) {}
+}
+
+async function openPM() {
+  document.getElementById('pmModal').classList.add('show');
+  if (!localStorage.getItem(NAME_CONFIRMED_KEY)) { openNameModal(true); return; }
+  pmViewingConversation = false;
+  pmCurrentFriend = null;
+  await renderPMList();
+}
+function closePM() { const m = document.getElementById('pmModal'); if (m) m.classList.remove('show'); }
+
+async function openPMWith(friendName) {
+  if (!document.getElementById('pmModal').classList.contains('show')) {
+    document.getElementById('pmModal').classList.add('show');
+  }
+  pmCurrentFriend = friendName;
+  pmViewingConversation = true;
+  await renderPMConversation();
+}
+
+async function renderPMList() {
+  const body = document.getElementById('pmBody');
+  body.innerHTML = '<div class="rank-loading">⏳ A carregar...</div>';
+  const me = getUserName();
+  try {
+    const { data, error } = await supabaseClient.from('private_messages').select('*')
+      .or('from_player.eq.' + me + ',to_player.eq.' + me)
+      .order('created_at', { ascending: false })
+      .limit(200);
+    if (error) throw error;
+
+    const convs = {};
+    (data || []).forEach(m => {
+      const other = m.from_player === me ? m.to_player : m.from_player;
+      if (!convs[other]) convs[other] = { name: other, lastMsg: m, unread: 0 };
+      if (m.to_player === me && !m.is_read) convs[other].unread++;
+    });
+
+    const list = Object.values(convs);
+    body.innerHTML = '';
+    if (list.length === 0) {
+      body.innerHTML = '<div class="empty-msg-big">Sem conversas.<br>Vai aos teus <b>👥 Amigos</b> e clica em 💌 para começar!</div>';
+      return;
+    }
+
+    const wrap = document.createElement('div');
+    wrap.className = 'pm-list';
+    list.forEach(c => {
+      const el = document.createElement('div');
+      el.className = 'pm-conv' + (c.unread > 0 ? ' unread' : '');
+      el.innerHTML = '<div style="font-size:24px;">💬</div>' +
+        '<div class="pm-conv-info">' +
+          '<div class="pm-conv-name">' + escapeHtml(c.name) + (c.unread > 0 ? ' <span style="background:#ef4444;color:#fff;padding:1px 6px;border-radius:10px;font-size:10px;">' + c.unread + '</span>' : '') + '</div>' +
+          '<div class="pm-conv-preview">' + escapeHtml(c.lastMsg.message.slice(0, 40)) + '</div>' +
+        '</div>' +
+        '<div class="pm-conv-time">' + fmtChatTime(c.lastMsg.created_at) + '</div>';
+      el.onclick = () => openPMWith(c.name);
+      wrap.appendChild(el);
+    });
+    body.appendChild(wrap);
+  } catch(e) {
+    body.innerHTML = '<div class="empty-msg-big">Erro ao carregar.</div>';
+  }
+}
+
+async function renderPMConversation() {
+  const body = document.getElementById('pmBody');
+  body.innerHTML = '<div class="rank-loading">⏳ A carregar...</div>';
+  const me = getUserName();
+  const friend = pmCurrentFriend;
+  try {
+    const { data, error } = await supabaseClient.from('private_messages').select('*')
+      .or('and(from_player.eq.' + me + ',to_player.eq.' + friend + '),and(from_player.eq.' + friend + ',to_player.eq.' + me + ')')
+      .order('created_at', { ascending: true })
+      .limit(200);
+    if (error) throw error;
+
+    const unreadIds = (data || []).filter(m => m.to_player === me && !m.is_read).map(m => m.id);
+    if (unreadIds.length > 0) {
+      await supabaseClient.from('private_messages').update({ is_read: true }).in('id', unreadIds);
+      updatePMBadge();
+    }
+
+    body.innerHTML = '';
+    const container = document.createElement('div');
+    container.className = 'pm-thread';
+
+    const header = document.createElement('div');
+    header.style.cssText = 'display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:10px;';
+    header.innerHTML = '<button class="pm-back-btn" id="pmBack">← Voltar</button>' +
+      '<div style="font-weight:800;font-size:14px;">💬 ' + escapeHtml(friend) + '</div>';
+    container.appendChild(header);
+
+    const msgsDiv = document.createElement('div');
+    msgsDiv.className = 'pm-thread-msgs';
+    msgsDiv.id = 'pmThreadMsgs';
+    (data || []).forEach(m => {
+      const isMe = m.from_player === me;
+      const msgEl = document.createElement('div');
+      msgEl.className = 'pm-msg ' + (isMe ? 'me' : 'them');
+      msgEl.innerHTML = escapeHtml(m.message) + '<div class="pm-msg-time">' + fmtChatTime(m.created_at) + '</div>';
+      msgsDiv.appendChild(msgEl);
+    });
+    container.appendChild(msgsDiv);
+
+    const inputRow = document.createElement('div');
+    inputRow.className = 'chat-input-row';
+    inputRow.innerHTML = '<input type="text" class="chat-input" id="pmInput" maxlength="500" placeholder="Escreve uma mensagem...">' +
+      '<button class="chat-send-btn" id="pmSend">📤</button>';
+    container.appendChild(inputRow);
+
+    body.appendChild(container);
+
+    document.getElementById('pmBack').onclick = () => { pmViewingConversation = false; pmCurrentFriend = null; renderPMList(); };
+    document.getElementById('pmSend').onclick = () => sendPM();
+    document.getElementById('pmInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendPM(); });
+
+    msgsDiv.scrollTop = msgsDiv.scrollHeight;
+    setTimeout(() => document.getElementById('pmInput')?.focus(), 100);
+  } catch(e) {
+    body.innerHTML = '<div class="empty-msg-big">Erro ao carregar.</div>';
+  }
+}
+
+async function sendPM() {
+  if (!pmCurrentFriend) return;
+  const input = document.getElementById('pmInput');
+  const msg = (input.value || '').trim().slice(0, 500);
+  if (!msg) return;
+  try {
+    const { error } = await supabaseClient.from('private_messages').insert({
+      from_player: getUserName(), to_player: pmCurrentFriend, message: msg
+    });
+    if (error) { toast('❌ ' + error.message); return; }
+    input.value = '';
+    await renderPMConversation();
+  } catch(e) { toast('❌ Erro'); }
+}
+
+function subscribePM() {
+  if (!supabaseClient || pmChannel) return;
+  try {
+    pmChannel = supabaseClient.channel('pm-updates')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'private_messages' }, (payload) => {
+        if (payload.new && payload.new.to_player === getUserName()) {
+          if (pmViewingConversation && pmCurrentFriend === payload.new.from_player) {
+            renderPMConversation();
+          } else {
+            notify('💌 Nova Mensagem', payload.new.from_player + ': ' + payload.new.message.slice(0, 60));
+            toast('💌 Nova mensagem de ' + payload.new.from_player);
+          }
+          updatePMBadge();
+        }
+      }).subscribe();
+  } catch(e) {}
+}
+
+/* ============ TEMAS ============ */
+function openThemes() {
+  document.getElementById('themesModal').classList.add('show');
+  renderThemes();
+}
+function closeThemes() { const m = document.getElementById('themesModal'); if (m) m.classList.remove('show'); }
+
+function renderThemes() {
+  const grid = document.getElementById('themeGrid');
+  const current = getTemaAtual();
+  grid.innerHTML = '';
+  THEMES.forEach(t => {
+    const unlocked = podeUsarTema(t);
+    const card = document.createElement('div');
+    card.className = 'theme-card' + (t.id === current ? ' active' : '') + (unlocked ? '' : ' locked');
+    card.style.background = t.color + '30';
+    card.style.borderColor = t.id === current ? t.color : 'transparent';
+    card.innerHTML =
+      (t.id === current ? '<div class="theme-check">✅</div>' : '') +
+      '<div class="theme-preview">' + t.emoji + '</div>' +
+      '<div class="theme-name" style="color:' + t.color + '">' + t.name + '</div>' +
+      (unlocked ? '' : '<div class="theme-req">🔒 ' + t.req + ' rebirths</div>');
+    if (unlocked) card.onclick = () => selectTheme(t.id);
+    grid.appendChild(card);
+  });
+}
+
+function selectTheme(id) {
+  aplicarTema(id);
+  toast('🌈 Tema aplicado!');
+  renderThemes();
+  setTimeout(closeThemes, 400);
 }
 
 /* ============ AUTO-UPDATE ============ */
@@ -2336,22 +3088,12 @@ function setupAutoUpdater() {
 
 /* ============ TUTORIAL ============ */
 const TUTORIAL_STEPS = [
-  { icon:'👋', title:'Bem-vindo ao Clicker Simulator!',
-    text:'Este é um jogo onde clicas para ganhar <b>cliques</b>, abres <b>ovos</b> para conseguir <b>pets</b>, e fazes <b>rebirths</b> para ficar mais forte. Vamos aprender o básico!' },
-  { icon:'👆', title:'Clica para ganhar',
-    text:'Clica no <span class="highlight">botão azul grande</span> no centro para ganhar cliques. Cada clique vale o teu multiplicador atual (<b id="tutorialCpc">1×</b>).',
-    highlight:'clickBtn' },
-  { icon:'🥚', title:'Abre o teu primeiro ovo',
-    text:'Vai à <span class="highlight">Loja de Ovos</span> e clica no <b>Ovo Básico</b> (custa 100 cliques). Cada ovo dá-te um pet aleatório!',
-    highlight:'eggList' },
-  { icon:'🐾', title:'Equipa os teus pets',
-    text:'Os pets dão-te <b>multiplicadores</b>. Vai ao <span class="highlight">Inventário</span> à direita e clica num pet para o equipar. Podes ter até <b>4 equipados</b>!',
-    highlight:'inventoryList' },
-  { icon:'🔄', title:'Faz Rebirth',
-    text:'Quando chegares a <b>50K cliques</b>, clica em <span class="highlight">Rebirth</span> no topo. Perdes os cliques mas ganhas <b>+0.5× permanente</b> e desbloqueias novos mundos!',
-    highlight:'rebirthBtn' },
-  { icon:'🎉', title:'Estás pronto!',
-    text:'Explora o jogo à vontade: há <b>4 mundos</b>, <b>150+ pets</b>, <b>fusões</b>, <b>chat</b>, <b>presentes</b> e <b>rankings</b>. Bom jogo! 🐾' },
+  { icon:'👋', title:'Bem-vindo ao Clicker Simulator!', text:'Este é um jogo onde clicas para ganhar <b>cliques</b>, abres <b>ovos</b> para conseguir <b>pets</b>, e fazes <b>rebirths</b> para ficar mais forte. Vamos aprender o básico!' },
+  { icon:'👆', title:'Clica para ganhar', text:'Clica no <span class="highlight">botão azul grande</span> no centro para ganhar cliques. Cada clique vale o teu multiplicador atual (<b id="tutorialCpc">1×</b>).', highlight:'clickBtn' },
+  { icon:'🥚', title:'Abre o teu primeiro ovo', text:'Vai à <span class="highlight">Loja de Ovos</span> e clica no <b>Ovo Básico</b> (custa 100 cliques). Cada ovo dá-te um pet aleatório!', highlight:'eggList' },
+  { icon:'🐾', title:'Equipa os teus pets', text:'Os pets dão-te <b>multiplicadores</b>. Vai ao <span class="highlight">Inventário</span> à direita e clica num pet para o equipar. Podes ter até <b>4 equipados</b>!', highlight:'inventoryList' },
+  { icon:'🔄', title:'Faz Rebirth', text:'Quando chegares a <b>50K cliques</b>, clica em <span class="highlight">Rebirth</span> no topo. Perdes os cliques mas ganhas <b>+0.5× permanente</b> e desbloqueias novos mundos e temas!', highlight:'rebirthBtn' },
+  { icon:'🎉', title:'Estás pronto!', text:'Explora o jogo à vontade: há <b>5 mundos</b>, <b>180+ pets</b>, <b>fusões</b>, <b>chat</b>, <b>amigos</b>, <b>presentes</b>, <b>temas</b> e <b>rankings</b>. Bom jogo! 🐾' },
 ];
 let tutorialStep = 0;
 function startTutorial() {
@@ -2391,7 +3133,6 @@ function endTutorial() {
   document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
   document.getElementById('tutorialOverlay').classList.remove('show');
   toast('🎉 Tutorial concluído! Bom jogo!');
-  // Se ainda não tem nome, abre o modal
   if (!localStorage.getItem(NAME_CONFIRMED_KEY)) {
     setTimeout(() => openNameModal(true), 400);
   }
@@ -2401,24 +3142,18 @@ function endTutorial() {
 function checkOfflineEarnings() {
   const lastSeen = localStorage.getItem(LAST_SEEN_KEY);
   if (!lastSeen) return;
-
   const elapsed = Date.now() - parseInt(lastSeen);
   const MIN_MS = 5 * 60 * 1000;
   if (elapsed < MIN_MS) return;
-
   const MAX_MS = 8 * 60 * 60 * 1000;
   const effectiveMs = Math.min(elapsed, MAX_MS);
-
   const cpc = getCPC();
   const secondsAway = Math.floor(effectiveMs / 1000);
   const earnings = Math.floor(cpc * secondsAway * 0.1);
-
   if (earnings < 1) return;
-
   const timeStr = fmtTime(elapsed);
   document.getElementById('offlineTime').textContent = 'Estiveste fora ' + timeStr;
   document.getElementById('offlineReward').textContent = '+' + fmt(earnings) + ' cliques';
-
   const claimBtn = document.getElementById('offlineClaim');
   claimBtn.onclick = () => {
     state.clicks += earnings;
@@ -2428,9 +3163,7 @@ function checkOfflineEarnings() {
     toast('🎁 Recebeste ' + fmt(earnings) + ' cliques offline!');
     if (musica && musica.paused) musica.play().catch(() => {});
   };
-
   if (musica && musica.paused) musica.play().catch(() => {});
-
   document.getElementById('offlineModal').classList.add('show');
 }
 
@@ -2460,7 +3193,7 @@ document.getElementById('rankNameBtn').addEventListener('click', () => openNameM
 document.getElementById('rankModal').addEventListener('click', e => { if (e.target.id === 'rankModal') closeRank(); });
 document.getElementById('rankTabTotal').addEventListener('click', () => switchRankTab('total'));
 document.getElementById('rankTabWeekly').addEventListener('click', () => switchRankTab('weekly'));
-document.getElementById('sellDupesBtn').addEventListener('click', sellAllDuplicates);
+document.getElementById('sellDupesBtn')?.addEventListener('click', sellAllDuplicates);
 document.getElementById('nameConfirm').addEventListener('click', saveName);
 document.getElementById('nameCancel').addEventListener('click', closeNameModal);
 document.getElementById('nameInput').addEventListener('keydown', e => {
@@ -2484,6 +3217,53 @@ document.getElementById('sendGiftClose').addEventListener('click', closeSendGift
 document.getElementById('sendGiftTo').addEventListener('keydown', e => { if (e.key === 'Enter') confirmSendGift(); });
 document.getElementById('sendGiftModal').addEventListener('click', e => { if (e.target.id === 'sendGiftModal') closeSendGift(); });
 
+document.getElementById('friendsBtn').addEventListener('click', openFriends);
+document.getElementById('friendsClose').addEventListener('click', closeFriends);
+document.getElementById('friendsModal').addEventListener('click', e => { if (e.target.id === 'friendsModal') closeFriends(); });
+document.getElementById('friendTabList').addEventListener('click', () => switchFriendTab('list'));
+document.getElementById('friendTabRequests').addEventListener('click', () => switchFriendTab('requests'));
+document.getElementById('friendTabAdd').addEventListener('click', () => switchFriendTab('add'));
+
+document.getElementById('pmBtn').addEventListener('click', openPM);
+document.getElementById('pmClose').addEventListener('click', closePM);
+document.getElementById('pmModal').addEventListener('click', e => { if (e.target.id === 'pmModal') closePM(); });
+
+document.getElementById('themesBtn').addEventListener('click', openThemes);
+document.getElementById('themesClose').addEventListener('click', closeThemes);
+document.getElementById('themesModal').addEventListener('click', e => { if (e.target.id === 'themesModal') closeThemes(); });
+
+document.getElementById('sendClicksCancel').addEventListener('click', closeSendClicks);
+document.getElementById('sendClicksConfirm').addEventListener('click', confirmSendClicks);
+document.getElementById('sendClicksClose').addEventListener('click', closeSendClicks);
+document.getElementById('sendClicksModal').addEventListener('click', e => { if (e.target.id === 'sendClicksModal') closeSendClicks(); });
+document.querySelectorAll('.amount-preset').forEach(btn => {
+  btn.onclick = () => {
+    const amt = btn.dataset.amt;
+    const input = document.getElementById('sendClicksAmount');
+    if (amt === 'max') input.value = Math.floor(state.clicks);
+    else input.value = Math.min(parseFloat(amt), Math.floor(state.clicks));
+  };
+});
+
+// INVENTÁRIO MODAL
+document.getElementById('openInventoryBtn').addEventListener('click', openInventory);
+document.getElementById('inventoryClose').addEventListener('click', closeInventory);
+document.getElementById('inventoryModal').addEventListener('click', e => {
+  if (e.target.id === 'inventoryModal') closeInventory();
+});
+document.getElementById('invSellDupesBtn').addEventListener('click', sellAllDuplicatesFromModal);
+document.getElementById('invSearchModal').addEventListener('input', e => {
+  invSearch = e.target.value;
+  renderInventory();
+});
+document.querySelectorAll('#invFilterBar .inv-filter-btn').forEach(btn => {
+  btn.onclick = () => {
+    invFilter = btn.dataset.filter;
+    document.querySelectorAll('#invFilterBar .inv-filter-btn').forEach(b => b.classList.toggle('active', b === btn));
+    renderInventory();
+  };
+});
+
 document.getElementById('autoEquipBtn').addEventListener('click', toggleAutoEquip);
 document.getElementById('autoFusionBtn').addEventListener('click', toggleAutoFusion);
 document.getElementById('eggMult1').addEventListener('click', () => setEggMultiplier(1));
@@ -2498,7 +3278,8 @@ document.getElementById('tutorialSkip').addEventListener('click', endTutorial);
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     closeCollection(); closeReveal(); closeMultiReveal(); closeFusion(); closeStats(); closeRank();
-    closeChat(); closeGifts(); closeSendGift();
+    closeChat(); closeGifts(); closeSendGift(); closeFriends(); closePM(); closeThemes(); closeSendClicks();
+    closeInventory();
   }
 });
 
@@ -2507,12 +3288,16 @@ setInterval(save, 5000);
 setInterval(enviarPontuacao, 60000);
 setInterval(submitWeeklyScore, 60000);
 setInterval(updateGiftsBadge, 45000);
+setInterval(updateFriendsBadge, 30000);
+setInterval(updatePMBadge, 30000);
+setInterval(checkClickGifts, 45000);
 
 /* ============ ARRANQUE ============ */
 load();
 updateUI();
 initAudio();
 setupAutoUpdater();
+aplicarTema(getTemaAtual());
 
 if (state.automation.autoEquip) document.getElementById('autoEquipBtn').classList.add('active');
 if (state.automation.autoFusion) {
@@ -2521,27 +3306,28 @@ if (state.automation.autoFusion) {
 }
 [1,2,3].forEach(i => document.getElementById('eggMult' + i).classList.toggle('active', i === state.automation.eggMultiplier));
 
-// Tutorial (primeira vez)
 if (!localStorage.getItem(TUTORIAL_KEY)) {
   setTimeout(() => startTutorial(), 600);
 }
-
-// Nome (depois do tutorial)
 if (!localStorage.getItem(NAME_CONFIRMED_KEY) && localStorage.getItem(TUTORIAL_KEY)) {
   setTimeout(() => openNameModal(true), 800);
 }
-
-// Ganhos offline
 setTimeout(() => {
   if (localStorage.getItem(NAME_CONFIRMED_KEY) || localStorage.getItem(TUTORIAL_KEY)) {
     checkOfflineEarnings();
   }
 }, 1500);
 
-// Enviar pontuação
+loadGlobalEvents();
+subscribeGlobalEvents();
+setInterval(loadGlobalEvents, 30000);
+setInterval(renderEventsBanner, 1000);
+
 setTimeout(() => {
   if (localStorage.getItem(NAME_CONFIRMED_KEY)) {
-    enviarPontuacao(); submitWeeklyScore(); updateGiftsBadge(); subscribeChat();
+    enviarPontuacao(); submitWeeklyScore(); updateGiftsBadge(); updateFriendsBadge(); updatePMBadge();
+    subscribeChat(); subscribeFriends(); subscribePM();
+    checkClickGifts();
   }
 }, 4000);
 </script>
