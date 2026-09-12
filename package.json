@@ -1,6 +1,6 @@
 {
   "name": "clicker-simulator",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "🐾 Clicker Simulator",
   "main": "main.js",
   "author": "BielzinYT",
@@ -11,12 +11,12 @@
     "release": "electron-builder --win --publish always"
   },
   "devDependencies": {
-    "electron": "^31.0.0",
-    "electron-builder": "^24.13.3"
+    "electron": "^44.3.0",
+    "electron-builder": "^26.15.3"
   },
   "dependencies": {
-    "electron-updater": "^6.3.0",
-    "electron-log": "^5.1.0"
+    "electron-log": "^5.1.0",
+    "electron-updater": "^6.3.0"
   },
   "build": {
     "appId": "com.bielzinyt.clickersimulator",
@@ -34,7 +34,9 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "icon.ico"
@@ -44,8 +46,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Clicker Simulator",
-      "differentialPackage": true
+      "shortcutName": "Clicker Simulator"
     },
     "publish": [
       {
