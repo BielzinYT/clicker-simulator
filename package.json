@@ -1,9 +1,9 @@
 {
   "name": "clicker-simulator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "🐾 Clicker Simulator",
   "main": "main.js",
-  "author": "O Teu Nome",
+  "author": "BielzinYT",
   "license": "MIT",
   "scripts": {
     "start": "electron .",
@@ -19,7 +19,7 @@
     "electron-log": "^5.1.0"
   },
   "build": {
-    "appId": "com.tunome.clickersimulator",
+    "appId": "com.bielzinyt.clickersimulator",
     "productName": "Clicker Simulator",
     "directories": {
       "output": "dist"
@@ -44,12 +44,13 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Clicker Simulator"
+      "shortcutName": "Clicker Simulator",
+      "differentialPackage": true
     },
     "publish": [
       {
         "provider": "github",
-        "owner": "O-TEU-USERNAME-GITHUB",
+        "owner": "BielzinYT",
         "repo": "clicker-simulator",
         "releaseType": "release"
       }
