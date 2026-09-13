@@ -32,26 +32,41 @@
 | ❄️ Mundo Gelo | 🏆 Sistema Social |
 |:---:|:---:|
 | ![Mundo Gelo](screenshots/screenshot-gelo.png) | ![Sistema Social](screenshots/screenshot-social.png) |
-| Desbloqueado com **10 rebirths**. O reino do gelo eterno! | Amigos, mensagens privadas e presentes. |
+| Desbloqueado com **10 rebirths**. O reino do gelo eterno! | Adiciona amigos e vê quem está online. |
 
-### 🎒 Inventário, Coleção e Rankings
-
-| 🎒 Inventário Renovado | 🏆 Coleção de Pets |
-|:---:|:---:|
-| ![Inventário](screenshots/screenshot-inventario.png) | ![Coleção](screenshots/screenshot-colecao-1.png) |
-| Grid limpo com filtros, pesquisa e ações rápidas. | Acompanha os pets que descobriste. |
-
-| 🌍 Ranking Global | 📅 Ranking Semanal |
-|:---:|:---:|
-| ![Ranking Total](screenshots/screenshot-ranking-total.png) | ![Ranking Semanal](screenshots/screenshot-ranking-semanal.png) |
-| Top 50 jogadores de sempre. | Reinicia todas as segundas-feiras. |
-
-### 💬 Chat, Mensagens e Personalização
+### 💬 Chat, Mensagens e Presentes
 
 | 💬 Chat Global | 💌 Mensagens Privadas |
 |:---:|:---:|
 | ![Chat](screenshots/screenshot-chat.png) | ![Mensagens](screenshots/screenshot-mensagens.png) |
 | Conversa em tempo real com todos os jogadores. | Conversas 1-a-1 com histórico. |
+
+| 🎁 Presentes | 🎒 Inventário Renovado |
+|:---:|:---:|
+| ![Presentes](screenshots/screenshot-presentes.png) | ![Inventário](screenshots/screenshot-inventario.png) |
+| Envia e recebe pets de outros jogadores. | Grid com filtros, pesquisa e ações rápidas. |
+
+### 🏆 Coleção de Pets
+
+| 🌱 Iniciante | 🌴 Selva |
+|:---:|:---:|
+| ![Coleção Iniciante](screenshots/screenshot-colecao-1.png) | ![Coleção Selva](screenshots/screenshot-colecao-2.png) |
+
+| 🌊 Oceano | 🌌 Cósmico |
+|:---:|:---:|
+| ![Coleção Oceano](screenshots/screenshot-colecao-3.png) | ![Coleção Cósmico](screenshots/screenshot-colecao-4.png) |
+
+| ❄️ Gelo | 🧬 Fusão de Pets |
+|:---:|:---:|
+| ![Coleção Gelo](screenshots/screenshot-colecao-5.png) | ![Fusão](screenshots/screenshot-fusao.png) |
+| 21 pets do reino gelado para descobrir! | Junta 3 iguais → pet ×4 mais forte. |
+
+### 🏅 Rankings e Estatísticas
+
+| 🌍 Ranking Total | 📅 Ranking Semanal |
+|:---:|:---:|
+| ![Ranking Total](screenshots/screenshot-ranking-total.png) | ![Ranking Semanal](screenshots/screenshot-ranking-semanal.png) |
+| Top 50 jogadores de sempre. | Reinicia todas as segundas-feiras. |
 
 | 📊 Estatísticas | 🌈 Temas |
 |:---:|:---:|
@@ -115,12 +130,29 @@
 
 ---
 
-## 🆕 Novidades da v1.3.0
+## 🆕 Histórico de Versões
 
-- 🍔 **Menu Hamburger** — todos os modos de jogo num menu compacto e elegante
-- ✨ **Design Renovado** — paleta de cores moderna, glassmorphism, sombras em camadas
-- 🎨 **Cards de ovos com gradiente** e animações subtis
-- 🐛 **Correção do bug das milestones** — agora aparecem só uma vez, mesmo ao reabrir
+### v1.3.0 — Design Renovado & Menu Hamburger
+- 🍔 Menu hamburger com todos os modos
+- ✨ Design moderno com glassmorphism
+- 🐛 Correção do bug das milestones (agora aparecem só uma vez)
+
+### v1.2.1 — Correção de Estrutura
+- 📁 Reorganização em `src/` e `assets/`
+
+### v1.2.0 — Era Social & Mundo de Gelo
+- ❄️ 5º mundo: Gelo (21 novos pets)
+- 👥 Amigos, mensagens privadas e presentes
+- 🌈 5 temas desbloqueáveis
+- 🎒 Inventário em modal
+
+### v1.1.0 — Áudio & Retenção
+- 🎵 Música de fundo + efeitos sonoros
+- 👶 Tutorial interativo
+- 🌙 Ganhos offline
+
+### v1.0.0 — Lançamento Inicial
+- 🎮 4 mundos, 150+ pets, ranking online, chat
 
 ---
 
