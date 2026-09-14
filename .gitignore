@@ -17,7 +17,6 @@ logs/
 # Configurações locais
 .env
 .env.local
-.env.*.local
 
 # Sistema operativo
 .DS_Store

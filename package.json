@@ -1,38 +1,41 @@
 {
   "name": "clicker-simulator",
-  "version": "1.3.0",
-  "description": "Clicker Simulator",
+  "version": "1.4.0",
+  "description": "Clicker Simulator - jogo clicker com pets, rebirths e multiplayer",
   "main": "src/main.js",
   "author": "BielzinYT",
   "license": "MIT",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder --win"
-  },
-  "devDependencies": {
-    "electron": "^31.0.0",
-    "electron-builder": "^26.0.0"
+    "build": "electron-builder",
+    "release": "electron-builder --publish always"
   },
   "dependencies": {
-    "electron-updater": "^6.3.0",
-    "electron-log": "^5.1.0"
+    "electron-log": "^5.4.4",
+    "electron-updater": "^6.1.7"
+  },
+  "devDependencies": {
+    "electron": "^44.3.0",
+    "electron-builder": "^26.15.3"
   },
   "build": {
     "appId": "com.bielzinyt.clickersimulator",
     "productName": "Clicker Simulator",
-    "directories": { "output": "dist" },
+    "artifactName": "Clicker-Simulator-Setup-${version}.${ext}",
     "files": [
       "src/**/*",
-      "assets/**/*",
-      "package.json"
-    ],
-    "extraResources": [
-      { "from": "assets", "to": "assets" }
+      "assets/**/*"
     ],
     "win": {
-      "target": [{ "target": "nsis", "arch": ["x64"] }],
-      "icon": "assets/icon.ico",
-      "artifactName": "Clicker-Simulator-Setup-${version}.${ext}"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -42,7 +45,12 @@
       "shortcutName": "Clicker Simulator"
     },
     "publish": [
-      { "provider": "github", "owner": "BielzinYT", "repo": "clicker-simulator" }
+      {
+        "provider": "github",
+        "owner": "BielzinYT",
+        "repo": "clicker-simulator",
+        "releaseType": "release"
+      }
     ]
   }
 }

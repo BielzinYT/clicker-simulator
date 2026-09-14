@@ -3,103 +3,155 @@ const path = require('path');
 const { autoUpdater } = require('electron-updater');
 const log = require('electron-log');
 
+// ============ CONFIG LOG ============
+log.transports.file.level = 'info';
+log.transports.console.level = 'info';
+log.transports.file.maxSize = 5 * 1024 * 1024; // 5 MB
+log.transports.file.resolvePathFn = () =>
+  path.join(app.getPath('userData'), 'logs', 'main.log');
+
+// Auto-updater logging
 autoUpdater.logger = log;
 autoUpdater.logger.transports.file.level = 'info';
+
+// Auto-update: não descarregar automaticamente (deixamos o renderer controlar)
 autoUpdater.autoDownload = false;
 autoUpdater.autoInstallOnAppQuit = true;
 
 let mainWindow = null;
 
+// ============ WINDOW ============
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1400,
-    height: 900,
+    width: 1280,
+    height: 820,
     minWidth: 900,
     minHeight: 600,
-    title: 'Clicker Simulator',
-    backgroundColor: '#0a0f1e',
-    icon: path.join(__dirname, 'icon.ico'),
+    icon: path.join(__dirname, '../assets/icon.ico'),
+    autoHideMenuBar: true,
+    backgroundColor: '#080c18',
+    show: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
+      sandbox: false,
     },
   });
-  mainWindow.setMenuBarVisibility(false);
-  mainWindow.loadFile('index.html');
+
+  mainWindow.loadFile(path.join(__dirname, 'index.html'));
+
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+  });
+
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
 }
 
-// ===== AUTO-UPDATER =====
-autoUpdater.on('update-available', (info) => {
-  if (mainWindow) mainWindow.webContents.send('update:available', {
-    version: info.version,
-    releaseNotes: info.releaseNotes || 'Sem notas de lançamento.',
-    releaseDate: info.releaseDate,
+// ============ AUTO-UPDATE ============
+function setupAutoUpdater() {
+  autoUpdater.on('checking-for-update', () => {
+    log.info('🔍 A verificar atualizações...');
+    sendToRenderer('update-checking');
   });
-});
-autoUpdater.on('update-not-available', () => {
-  if (mainWindow) mainWindow.webContents.send('update:none');
-});
-autoUpdater.on('download-progress', (progress) => {
-  if (mainWindow) mainWindow.webContents.send('update:progress', {
-    percent: Math.round(progress.percent),
-    bytesPerSecond: progress.bytesPerSecond,
-    transferred: progress.transferred,
-    total: progress.total,
+
+  autoUpdater.on('update-available', (info) => {
+    log.info('🆕 Atualização disponível:', info.version);
+    sendToRenderer('update-available', {
+      version: info.version,
+      releaseNotes: info.releaseNotes || '',
+      releaseDate: info.releaseDate || '',
+    });
   });
-});
-autoUpdater.on('update-downloaded', (info) => {
-  if (mainWindow) mainWindow.webContents.send('update:downloaded', info.version);
-});
-autoUpdater.on('error', (err) => {
-  if (mainWindow) mainWindow.webContents.send('update:error', err.message || String(err));
-});
 
-// ===== IPC =====
-ipcMain.handle('update:check',    () => autoUpdater.checkForUpdates());
-ipcMain.handle('update:download', () => autoUpdater.downloadUpdate());
-ipcMain.handle('update:install',  () => autoUpdater.quitAndInstall());
-ipcMain.handle('app:version',     () => app.getVersion());
+  autoUpdater.on('update-not-available', (info) => {
+    log.info('✅ App atualizada:', info.version);
+    sendToRenderer('update-none', info.version);
+  });
 
-// ===== NOTIFICAÇÕES NATIVAS DO WINDOWS =====
-ipcMain.handle('notify:show', (event, { title, body }) => {
-  try {
-    if (!Notification.isSupported()) {
-      log.warn('Notificações não suportadas neste sistema');
-      return false;
-    }
-    const notif = new Notification({
-      title: String(title || 'Clicker Simulator').slice(0, 64),
-      body: String(body || '').slice(0, 256),
-      icon: path.join(__dirname, 'icon.ico'),
-      silent: false,
+  autoUpdater.on('error', (err) => {
+    log.error('❌ Erro no auto-update:', err);
+    sendToRenderer('update-error', err.message || String(err));
+  });
+
+  autoUpdater.on('download-progress', (p) => {
+    log.info(`📥 Download: ${p.percent.toFixed(1)}%`);
+    sendToRenderer('update-progress', {
+      percent: Math.floor(p.percent),
+      bytesPerSecond: p.bytesPerSecond,
+      transferred: p.transferred,
+      total: p.total,
     });
-    notif.on('click', () => {
-      if (mainWindow) {
-        if (mainWindow.isMinimized()) mainWindow.restore();
-        mainWindow.focus();
-      }
-    });
-    notif.show();
-    return true;
-  } catch (e) {
-    log.error('Erro ao mostrar notificação:', e);
-    return false;
+  });
+
+  autoUpdater.on('update-downloaded', (info) => {
+    log.info('✅ Atualização descarregada:', info.version);
+    sendToRenderer('update-downloaded', info.version);
+  });
+}
+
+function sendToRenderer(channel, payload) {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send(channel, payload);
   }
-});
+}
 
-// ===== ARRANQUE =====
+// ============ IPC ============
+function setupIPC() {
+  ipcMain.handle('get-version', () => app.getVersion());
+
+  ipcMain.handle('notify', (_, { title, body }) => {
+    try {
+      if (Notification.isSupported()) {
+        const n = new Notification({ title, body, icon: path.join(__dirname, '../assets/icon.ico') });
+        n.on('click', () => {
+          if (mainWindow) {
+            if (mainWindow.isMinimized()) mainWindow.restore();
+            mainWindow.focus();
+          }
+        });
+        n.show();
+        return true;
+      }
+    } catch (e) {
+      log.error('Erro ao mostrar notificação:', e);
+    }
+    return false;
+  });
+
+  ipcMain.on('check-updates', () => {
+    try { autoUpdater.checkForUpdates(); } catch (e) { log.error(e); }
+  });
+
+  ipcMain.on('download-update', () => {
+    try { autoUpdater.downloadUpdate(); } catch (e) { log.error(e); }
+  });
+
+  ipcMain.on('install-update', () => {
+    try { autoUpdater.quitAndInstall(false, true); } catch (e) { log.error(e); }
+  });
+}
+
+// ============ LIFE CYCLE ============
 app.whenReady().then(() => {
+  log.info('🚀 App iniciada — versão', app.getVersion());
+
+  setupAutoUpdater();
+  setupIPC();
   createWindow();
 
+  // Verifica updates 10s depois do arranque
   if (app.isPackaged) {
     setTimeout(() => {
-      autoUpdater.checkForUpdates().catch(err => log.error('Check falhou:', err));
-    }, 3000);
+      autoUpdater.checkForUpdates().catch((e) => log.error('check falhou:', e));
+    }, 10000);
 
+    // Verifica a cada 30 min
     setInterval(() => {
-      autoUpdater.checkForUpdates().catch(err => log.error('Check falhou:', err));
-    }, 4 * 60 * 60 * 1000);
+      autoUpdater.checkForUpdates().catch(() => {});
+    }, 30 * 60 * 1000);
   }
 
   app.on('activate', () => {
@@ -109,4 +161,12 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
+});
+
+process.on('uncaughtException', (err) => {
+  log.error('💥 Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  log.error('💥 Unhandled Rejection:', reason);
 });
